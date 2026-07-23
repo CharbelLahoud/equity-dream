@@ -1,0 +1,119 @@
+// Realistic mock data for the platform
+
+export const stocks = [
+  { symbol: "AAPL", name: "Apple Inc.", sector: "Technology", price: 214.32, change: 1.82, changePct: 0.86, marketCap: "3.28T", volume: "48.2M" },
+  { symbol: "MSFT", name: "Microsoft Corp.", sector: "Technology", price: 428.71, change: 3.45, changePct: 0.81, marketCap: "3.19T", volume: "22.1M" },
+  { symbol: "NVDA", name: "NVIDIA Corp.", sector: "Semiconductors", price: 132.65, change: -2.14, changePct: -1.59, marketCap: "3.26T", volume: "312.5M" },
+  { symbol: "GOOGL", name: "Alphabet Inc.", sector: "Technology", price: 178.29, change: 0.94, changePct: 0.53, marketCap: "2.20T", volume: "18.7M" },
+  { symbol: "AMZN", name: "Amazon.com Inc.", sector: "Consumer", price: 189.44, change: 2.17, changePct: 1.16, marketCap: "1.97T", volume: "34.6M" },
+  { symbol: "TSLA", name: "Tesla Inc.", sector: "Automotive", price: 243.87, change: -5.32, changePct: -2.13, marketCap: "776.4B", volume: "108.9M" },
+  { symbol: "META", name: "Meta Platforms", sector: "Technology", price: 528.10, change: 4.78, changePct: 0.91, marketCap: "1.34T", volume: "14.2M" },
+  { symbol: "JPM", name: "JPMorgan Chase", sector: "Financials", price: 216.44, change: 1.23, changePct: 0.57, marketCap: "618.2B", volume: "8.7M" },
+  { symbol: "V", name: "Visa Inc.", sector: "Financials", price: 289.62, change: -0.87, changePct: -0.30, marketCap: "573.1B", volume: "5.9M" },
+  { symbol: "JNJ", name: "Johnson & Johnson", sector: "Healthcare", price: 156.82, change: 0.42, changePct: 0.27, marketCap: "378.4B", volume: "6.8M" },
+  { symbol: "XOM", name: "Exxon Mobil", sector: "Energy", price: 118.75, change: -1.15, changePct: -0.96, marketCap: "471.3B", volume: "17.4M" },
+  { symbol: "WMT", name: "Walmart Inc.", sector: "Consumer", price: 82.14, change: 0.68, changePct: 0.83, marketCap: "662.8B", volume: "12.4M" },
+];
+
+export const holdings = [
+  { symbol: "AAPL", name: "Apple Inc.", shares: 45, avgPrice: 178.20, currentPrice: 214.32, allocation: 22 },
+  { symbol: "NVDA", name: "NVIDIA Corp.", shares: 120, avgPrice: 98.45, currentPrice: 132.65, allocation: 18 },
+  { symbol: "MSFT", name: "Microsoft Corp.", shares: 22, avgPrice: 385.10, currentPrice: 428.71, allocation: 16 },
+  { symbol: "GOOGL", name: "Alphabet Inc.", shares: 60, avgPrice: 165.30, currentPrice: 178.29, allocation: 14 },
+  { symbol: "TSLA", name: "Tesla Inc.", shares: 35, avgPrice: 268.90, currentPrice: 243.87, allocation: 9 },
+  { symbol: "META", name: "Meta Platforms", shares: 18, avgPrice: 472.60, currentPrice: 528.10, allocation: 12 },
+  { symbol: "JPM", name: "JPMorgan Chase", shares: 40, avgPrice: 198.30, currentPrice: 216.44, allocation: 9 },
+];
+
+export const portfolioGrowth = Array.from({ length: 30 }, (_, i) => {
+  const base = 120000;
+  const trend = i * 950;
+  const noise = Math.sin(i * 0.7) * 3200 + Math.cos(i * 0.3) * 1800;
+  return {
+    day: `Day ${i + 1}`,
+    value: Math.round(base + trend + noise),
+  };
+});
+
+export const stockChart = Array.from({ length: 60 }, (_, i) => {
+  const base = 180;
+  return {
+    t: i,
+    price: +(base + Math.sin(i * 0.3) * 8 + Math.cos(i * 0.15) * 12 + i * 0.4).toFixed(2),
+  };
+});
+
+export const transactions = [
+  { id: "TXN-10482", date: "2026-07-22 14:32", type: "BUY", symbol: "AAPL", shares: 10, price: 213.85, total: 2138.50, status: "Completed" },
+  { id: "TXN-10481", date: "2026-07-22 11:04", type: "SELL", symbol: "TSLA", shares: 5, price: 245.20, total: 1226.00, status: "Completed" },
+  { id: "TXN-10480", date: "2026-07-21 16:48", type: "DEPOSIT", symbol: "-", shares: 0, price: 0, total: 5000.00, status: "Completed" },
+  { id: "TXN-10479", date: "2026-07-21 09:12", type: "BUY", symbol: "NVDA", shares: 15, price: 134.20, total: 2013.00, status: "Completed" },
+  { id: "TXN-10478", date: "2026-07-20 13:55", type: "BUY", symbol: "MSFT", shares: 3, price: 427.90, total: 1283.70, status: "Pending" },
+  { id: "TXN-10477", date: "2026-07-20 10:22", type: "SELL", symbol: "META", shares: 4, price: 524.80, total: 2099.20, status: "Completed" },
+  { id: "TXN-10476", date: "2026-07-19 15:10", type: "WITHDRAW", symbol: "-", shares: 0, price: 0, total: 1500.00, status: "Completed" },
+  { id: "TXN-10475", date: "2026-07-19 11:33", type: "BUY", symbol: "GOOGL", shares: 8, price: 177.10, total: 1416.80, status: "Completed" },
+  { id: "TXN-10474", date: "2026-07-18 14:02", type: "SELL", symbol: "AAPL", shares: 6, price: 212.60, total: 1275.60, status: "Failed" },
+  { id: "TXN-10473", date: "2026-07-18 09:45", type: "BUY", symbol: "JPM", shares: 12, price: 215.30, total: 2583.60, status: "Completed" },
+];
+
+export const orders = [
+  { id: "ORD-9821", date: "2026-07-22 14:32", type: "BUY", symbol: "AAPL", shares: 10, limit: 214.00, status: "Filled" },
+  { id: "ORD-9820", date: "2026-07-22 13:10", type: "BUY", symbol: "NVDA", shares: 20, limit: 130.00, status: "Open" },
+  { id: "ORD-9819", date: "2026-07-22 11:04", type: "SELL", symbol: "TSLA", shares: 5, limit: 245.00, status: "Filled" },
+  { id: "ORD-9818", date: "2026-07-21 15:23", type: "SELL", symbol: "META", shares: 3, limit: 535.00, status: "Open" },
+  { id: "ORD-9817", date: "2026-07-21 09:12", type: "BUY", symbol: "NVDA", shares: 15, limit: 135.00, status: "Filled" },
+  { id: "ORD-9816", date: "2026-07-20 16:00", type: "BUY", symbol: "AMZN", shares: 8, limit: 188.00, status: "Cancelled" },
+  { id: "ORD-9815", date: "2026-07-20 10:22", type: "SELL", symbol: "META", shares: 4, limit: 524.00, status: "Filled" },
+];
+
+export const notifications = [
+  { id: 1, category: "Price Alert", title: "AAPL crossed $210", body: "Apple Inc. is up 2.1% today.", time: "12 min ago", read: false },
+  { id: 2, category: "Order", title: "Order Filled", body: "Your buy order for 10 AAPL @ $213.85 was executed.", time: "36 min ago", read: false },
+  { id: 3, category: "Deposit", title: "Deposit Received", body: "$5,000 has been credited to your wallet.", time: "5 hours ago", read: true },
+  { id: 4, category: "Price Alert", title: "TSLA dropped 2%", body: "Tesla is trading below your alert threshold.", time: "1 day ago", read: true },
+  { id: 5, category: "System", title: "New research report", body: "Weekly market outlook is available.", time: "2 days ago", read: true },
+  { id: 6, category: "Order", title: "Order Cancelled", body: "Your limit order for AMZN was cancelled.", time: "3 days ago", read: true },
+];
+
+export const priceAlerts = [
+  { symbol: "AAPL", condition: ">", target: 220.00, current: 214.32, active: true },
+  { symbol: "NVDA", condition: "<", target: 125.00, current: 132.65, active: true },
+  { symbol: "TSLA", condition: ">", target: 260.00, current: 243.87, active: true },
+  { symbol: "MSFT", condition: "<", target: 400.00, current: 428.71, active: false },
+];
+
+export const users = [
+  { id: "U-1042", name: "Sarah Johnson", email: "sarah.j@example.com", joined: "2025-03-14", portfolio: 128450, status: "Active", role: "Investor" },
+  { id: "U-1041", name: "Michael Chen", email: "m.chen@example.com", joined: "2025-04-02", portfolio: 87220, status: "Active", role: "Investor" },
+  { id: "U-1040", name: "Priya Patel", email: "priya.p@example.com", joined: "2025-05-19", portfolio: 245800, status: "Active", role: "Premium" },
+  { id: "U-1039", name: "David Kim", email: "d.kim@example.com", joined: "2025-06-08", portfolio: 32410, status: "Suspended", role: "Investor" },
+  { id: "U-1038", name: "Emma Wilson", email: "emma.w@example.com", joined: "2025-06-22", portfolio: 512300, status: "Active", role: "Premium" },
+  { id: "U-1037", name: "James Rivera", email: "j.rivera@example.com", joined: "2025-07-01", portfolio: 18900, status: "Pending", role: "Investor" },
+];
+
+export const sectorAllocation = [
+  { name: "Technology", value: 52 },
+  { name: "Financials", value: 14 },
+  { name: "Consumer", value: 12 },
+  { name: "Healthcare", value: 9 },
+  { name: "Energy", value: 7 },
+  { name: "Other", value: 6 },
+];
+
+export const tradingVolume = Array.from({ length: 12 }, (_, i) => ({
+  month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
+  volume: Math.round(2200 + Math.sin(i * 0.7) * 600 + i * 120),
+  trades: Math.round(1400 + Math.cos(i * 0.5) * 300 + i * 60),
+}));
+
+export const marketOverview = [
+  { name: "S&P 500", value: "5,632.14", change: 0.62 },
+  { name: "NASDAQ", value: "18,214.85", change: 0.94 },
+  { name: "Dow Jones", value: "40,842.19", change: -0.18 },
+  { name: "Russell 2000", value: "2,215.47", change: 1.24 },
+];
+
+export const walletHistory = Array.from({ length: 14 }, (_, i) => ({
+  day: `${i + 1}`,
+  balance: Math.round(8200 + i * 340 + Math.sin(i * 0.9) * 500),
+}));
