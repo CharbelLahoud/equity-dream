@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell, StatCard } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { getMyProfile } from "@/services/member";
+import { DashboardWalletCard } from '@/components/dashboard-wallet-card';
 import {
   Area,
   AreaChart,
@@ -33,12 +36,16 @@ import {
   stocks,
   transactions,
 } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Dashboard · Meridian Trading Platform" },
-      { name: "description", content: "Portfolio value, wallet balance, P&L, watchlist and market overview at a glance." },
+      {
+        name: "description",
+        content: "Portfolio value, wallet balance, P&L, watchlist and market overview at a glance.",
+      },
       { property: "og:title", content: "Dashboard · Meridian" },
       { property: "og:description", content: "Your complete trading dashboard." },
     ],
@@ -49,14 +56,76 @@ export const Route = createFileRoute("/")({
 const PIE_COLORS = ["#1E3A8A", "#22C55E", "#F59E0B", "#3B82F6", "#EF4444", "#94A3B8"];
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const [token, setToken] = useState<string | null>(null);
+
+useEffect(() => {
+  const storedToken =
+    localStorage.getItem("accessToken") ??
+    sessionStorage.getItem("accessToken");
+
+  setToken(storedToken);
+
+  if (!storedToken) {
+    navigate({ to: "/login" });
+  }
+}, [navigate]);
+
+  const {
+    data: member,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["my-profile"],
+    queryFn: getMyProfile,
+    enabled: Boolean(token),
+    retry: false,
+  });
+
   const watchlist = stocks.slice(0, 5);
+
   return (
-    <AppShell title="Welcome back, Sarah" subtitle="Here's what's happening with your portfolio today.">
+    <AppShell
+      title={
+        isLoading
+          ? "Loading profile..."
+          : isError
+            ? "Welcome back"
+            : `Welcome back, ${member?.fullName}`
+      }
+      subtitle="Here's what's happening with your portfolio today."
+    >
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Portfolio Value" value="$128,450.32" delta="+$3,214.80 (2.56%)" deltaTone="profit" hint="today" icon={Wallet} />
-        <StatCard label="Wallet Balance" value="$14,282.10" delta="Available to trade" deltaTone="neutral" icon={DollarSign} />
-        <StatCard label="Total P&L" value="+$28,412.55" delta="+28.4% all-time" deltaTone="profit" icon={TrendingUp} />
-        <StatCard label="Top Performer" value="NVDA +34.7%" delta="Since purchase" deltaTone="profit" icon={Star} />
+        <StatCard
+          label="Portfolio Value"
+          value="$128,450.32"
+          delta="+$3,214.80 (2.56%)"
+          deltaTone="profit"
+          hint="today"
+          icon={Wallet}
+        />
+        {/* <StatCard
+          label="Wallet Balance"
+          value="$14,282.10"
+          delta="Available to trade"
+          deltaTone="neutral"
+          icon={DollarSign}
+        /> */}
+        <DashboardWalletCard />
+        <StatCard
+          label="Total P&L"
+          value="+$28,412.55"
+          delta="+28.4% all-time"
+          deltaTone="profit"
+          icon={TrendingUp}
+        />
+        <StatCard
+          label="Top Performer"
+          value="NVDA +34.7%"
+          delta="Since purchase"
+          deltaTone="profit"
+          icon={Star}
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -64,8 +133,11 @@ function Dashboard() {
           <div key={m.name} className="card-elev p-4">
             <div className="text-xs text-muted-foreground">{m.name}</div>
             <div className="mt-1 text-lg font-semibold">{m.value}</div>
-            <div className={`mt-0.5 text-xs font-medium ${m.change >= 0 ? "text-profit" : "text-loss"}`}>
-              {m.change >= 0 ? "+" : ""}{m.change}%
+            <div
+              className={`mt-0.5 text-xs font-medium ${m.change >= 0 ? "text-profit" : "text-loss"}`}
+            >
+              {m.change >= 0 ? "+" : ""}
+              {m.change}%
             </div>
           </div>
         ))}
@@ -79,8 +151,15 @@ function Dashboard() {
               <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
             </div>
             <div className="flex gap-1">
-              {["1D","1W","1M","3M","1Y","ALL"].map((r,i) => (
-                <Button key={r} variant={i===2?"default":"ghost"} size="sm" className="h-7 px-2 text-xs">{r}</Button>
+              {["1D", "1W", "1M", "3M", "1Y", "ALL"].map((r, i) => (
+                <Button
+                  key={r}
+                  variant={i === 2 ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                >
+                  {r}
+                </Button>
               ))}
             </div>
           </CardHeader>
@@ -97,8 +176,16 @@ function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                   <XAxis dataKey="day" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={60} />
-                  <Tooltip contentStyle={{ borderRadius: 8, borderColor: "#E2E8F0", fontSize: 12 }} />
-                  <Area type="monotone" dataKey="value" stroke="#1E3A8A" strokeWidth={2} fill="url(#pgrad)" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 8, borderColor: "#E2E8F0", fontSize: 12 }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#1E3A8A"
+                    strokeWidth={2}
+                    fill="url(#pgrad)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -114,7 +201,14 @@ function Dashboard() {
             <div className="h-52">
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={sectorAllocation} dataKey="value" nameKey="name" innerRadius={50} outerRadius={80} paddingAngle={2}>
+                  <Pie
+                    data={sectorAllocation}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                  >
                     {sectorAllocation.map((_, i) => (
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
@@ -126,7 +220,10 @@ function Dashboard() {
             <div className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
               {sectorAllocation.map((s, i) => (
                 <div key={s.name} className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-sm" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span
+                    className="h-2.5 w-2.5 rounded-sm"
+                    style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                  />
                   <span className="text-muted-foreground truncate">{s.name}</span>
                   <span className="ml-auto font-medium">{s.value}%</span>
                 </div>
@@ -140,7 +237,9 @@ function Dashboard() {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Transactions</CardTitle>
-            <Button variant="ghost" size="sm">View all</Button>
+            <Button variant="ghost" size="sm">
+              View all
+            </Button>
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
@@ -148,18 +247,29 @@ function Dashboard() {
                 const isBuy = t.type === "BUY" || t.type === "DEPOSIT";
                 return (
                   <div key={t.id} className="flex items-center gap-3 px-6 py-3">
-                    <div className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${isBuy ? "bg-profit/10 text-profit" : "bg-loss/10 text-loss"}`}>
-                      {isBuy ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                    <div
+                      className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${isBuy ? "bg-profit/10 text-profit" : "bg-loss/10 text-loss"}`}
+                    >
+                      {isBuy ? (
+                        <ArrowDownRight className="h-4 w-4" />
+                      ) : (
+                        <ArrowUpRight className="h-4 w-4" />
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 text-sm font-medium">
-                        {t.type} {t.symbol !== "-" && <span className="text-muted-foreground">· {t.symbol}</span>}
+                        {t.type}{" "}
+                        {t.symbol !== "-" && (
+                          <span className="text-muted-foreground">· {t.symbol}</span>
+                        )}
                       </div>
                       <div className="text-xs text-muted-foreground">{t.date}</div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-medium">${t.total.toLocaleString()}</div>
-                      <Badge variant="outline" className="text-[10px] mt-0.5">{t.status}</Badge>
+                      <Badge variant="outline" className="text-[10px] mt-0.5">
+                        {t.status}
+                      </Badge>
                     </div>
                   </div>
                 );
@@ -175,9 +285,14 @@ function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             {notifications.slice(0, 4).map((n) => (
-              <div key={n.id} className={`rounded-md border p-3 ${!n.read ? "bg-primary/5 border-primary/20" : ""}`}>
+              <div
+                key={n.id}
+                className={`rounded-md border p-3 ${!n.read ? "bg-primary/5 border-primary/20" : ""}`}
+              >
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline" className="text-[10px]">{n.category}</Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {n.category}
+                  </Badge>
                   <span className="text-[11px] text-muted-foreground">{n.time}</span>
                 </div>
                 <div className="mt-1 text-sm font-medium">{n.title}</div>
@@ -192,7 +307,9 @@ function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Watchlist</CardTitle>
-            <Button variant="outline" size="sm">Manage</Button>
+            <Button variant="outline" size="sm">
+              Manage
+            </Button>
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -215,15 +332,24 @@ function Dashboard() {
                         <td className="px-6 py-3 font-semibold">{s.symbol}</td>
                         <td className="px-4 py-3 text-muted-foreground">{s.name}</td>
                         <td className="px-4 py-3 text-right font-medium">${s.price.toFixed(2)}</td>
-                        <td className={`px-4 py-3 text-right font-medium ${up ? "text-profit" : "text-loss"}`}>
+                        <td
+                          className={`px-4 py-3 text-right font-medium ${up ? "text-profit" : "text-loss"}`}
+                        >
                           <span className="inline-flex items-center gap-1">
-                            {up ? <TrendingUp className="h-3 w-3"/> : <TrendingDown className="h-3 w-3"/>}
-                            {up ? "+" : ""}{s.changePct}%
+                            {up ? (
+                              <TrendingUp className="h-3 w-3" />
+                            ) : (
+                              <TrendingDown className="h-3 w-3" />
+                            )}
+                            {up ? "+" : ""}
+                            {s.changePct}%
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right text-muted-foreground">{s.volume}</td>
                         <td className="px-6 py-3 text-right">
-                          <Button size="sm" className="h-7">Trade</Button>
+                          <Button size="sm" className="h-7">
+                            Trade
+                          </Button>
                         </td>
                       </tr>
                     );

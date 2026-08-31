@@ -1,7 +1,5 @@
-﻿import {
-  useEffect,
+import {
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -135,48 +133,55 @@ type MessageType =
   | 'error'
   | '';
 
-// How often the frontend polls for fresh prices.
-// Keep this in sync with (or slightly above) the backend's
-// synchronizationIntervalMs in market-data.service.ts —
-// polling faster than the backend updates won't show new data sooner.
-const PRICE_REFRESH_INTERVAL_MS = 30_000;
-
 function StocksPage() {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
-  const [search, setSearch] = useState("");
-  const [sector, setSector] = useState("All");
+  const [search, setSearch] =
+    useState('');
 
-  const [listingFilter, setListingFilter] =
-    useState<ListingFilter>("all");
+  const [sector, setSector] =
+    useState('All');
 
-  const [sortOption, setSortOption] =
-    useState<SortOption>("newest");
+  const [
+    listingFilter,
+    setListingFilter,
+  ] = useState<ListingFilter>(
+    'all',
+  );
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] =
-    useState<MessageType>("");
+  const [
+    sortOption,
+    setSortOption,
+  ] = useState<SortOption>(
+    'newest',
+  );
 
-  const [currentCmsUser, setCurrentCmsUser] =
-    useState<CmsUser | null>(null);
+  const [message, setMessage] =
+    useState('');
 
-  const [isCmsUser, setIsCmsUser] = useState(false);
+  const [
+    messageType,
+    setMessageType,
+  ] = useState<MessageType>('');
 
-  useEffect(() => {
-    const storedUserType =
-      sessionStorage.getItem("userType");
+  const currentCmsUser =
+    getStoredCmsUser();
 
-    setIsCmsUser(storedUserType === "CMS");
-    setCurrentCmsUser(getStoredCmsUser());
-  }, []);
+  const isCmsUser =
+    sessionStorage.getItem(
+      'userType',
+    ) === 'CMS';
 
   const isAdministrator =
     isCmsUser &&
-    currentCmsUser?.role === "ADMINISTRATOR";
+    currentCmsUser?.role ===
+      'ADMINISTRATOR';
 
   const isAnalyst =
     isCmsUser &&
-    currentCmsUser?.role === "ANALYST";
+    currentCmsUser?.role ===
+      'ANALYST';
 
   const canManageStocks =
     isAdministrator || isAnalyst;
@@ -187,11 +192,9 @@ function StocksPage() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["stocks"],
+    queryKey: ['stocks'],
     queryFn: getStocks,
     retry: false,
-    refetchInterval: PRICE_REFRESH_INTERVAL_MS,
-    refetchIntervalInBackground: true,
   });
 
   const stocks: Stock[] =
@@ -203,106 +206,144 @@ function StocksPage() {
     const values = stocks
       .map((stock) => stock.sector)
       .filter(
-        (value): value is string =>
-          typeof value === "string" &&
+        (
+          value,
+        ): value is string =>
+          typeof value === 'string' &&
           value.trim().length > 0,
       );
 
     return [
-      "All",
-      ...Array.from(new Set(values)).sort(
-        (first, second) =>
-          first.localeCompare(second),
+      'All',
+      ...Array.from(
+        new Set(values),
+      ).sort((first, second) =>
+        first.localeCompare(second),
       ),
     ];
   }, [stocks]);
 
-  const filteredStocks = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase();
+  const filteredStocks =
+    useMemo(() => {
+      const normalizedSearch =
+        search
+          .trim()
+          .toLowerCase();
 
-    const result = stocks.filter((stock) => {
-      const ticker = stock.ticker ?? "";
-      const companyName = stock.companyName ?? "";
-      const stockSector = stock.sector ?? "";
+      const result = stocks.filter(
+        (stock) => {
+          const ticker =
+            stock.ticker ?? '';
 
-      const matchesSearch =
-        !normalizedSearch ||
-        ticker
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        companyName
-          .toLowerCase()
-          .includes(normalizedSearch);
+          const companyName =
+            stock.companyName ?? '';
 
-      const matchesSector =
-        sector === "All" ||
-        stockSector === sector;
+          const stockSector =
+            stock.sector ?? '';
 
-      const matchesListing =
-        listingFilter === "all" ||
-        (listingFilter === "listed" &&
-          stock.isListed) ||
-        (listingFilter === "delisted" &&
-          !stock.isListed);
+          const matchesSearch =
+            !normalizedSearch ||
+            ticker
+              .toLowerCase()
+              .includes(
+                normalizedSearch,
+              ) ||
+            companyName
+              .toLowerCase()
+              .includes(
+                normalizedSearch,
+              );
 
-      return (
-        matchesSearch &&
-        matchesSector &&
-        matchesListing
+          const matchesSector =
+            sector === 'All' ||
+            stockSector === sector;
+
+          const matchesListing =
+            listingFilter === 'all' ||
+            (listingFilter ===
+              'listed' &&
+              stock.isListed) ||
+            (listingFilter ===
+              'delisted' &&
+              !stock.isListed);
+
+          return (
+            matchesSearch &&
+            matchesSector &&
+            matchesListing
+          );
+        },
       );
-    });
 
-    return [...result].sort(
-      (first, second) => {
-        switch (sortOption) {
-          case "ticker":
-            return (
-              first.ticker ?? ""
-            ).localeCompare(
-              second.ticker ?? "",
-            );
+      return [...result].sort(
+        (first, second) => {
+          switch (sortOption) {
+            case 'ticker':
+              return (
+                first.ticker ?? ''
+              ).localeCompare(
+                second.ticker ?? '',
+              );
 
-          case "company":
-            return (
-              first.companyName ?? ""
-            ).localeCompare(
-              second.companyName ?? "",
-            );
+            case 'company':
+              return (
+                first.companyName ??
+                ''
+              ).localeCompare(
+                second.companyName ??
+                  '',
+              );
 
-          case "price-low":
-            return (
-              Number(first.currentPrice ?? 0) -
-              Number(second.currentPrice ?? 0)
-            );
+            case 'price-low':
+              return (
+                Number(
+                  first.currentPrice ??
+                    0,
+                ) -
+                Number(
+                  second.currentPrice ??
+                    0,
+                )
+              );
 
-          case "price-high":
-            return (
-              Number(second.currentPrice ?? 0) -
-              Number(first.currentPrice ?? 0)
-            );
+            case 'price-high':
+              return (
+                Number(
+                  second.currentPrice ??
+                    0,
+                ) -
+                Number(
+                  first.currentPrice ??
+                    0,
+                )
+              );
 
-          case "newest":
-          default:
-            return (
-              getTimestamp(second.createdAt) -
-              getTimestamp(first.createdAt)
-            );
-        }
-      },
-    );
-  }, [
-    stocks,
-    search,
-    sector,
-    listingFilter,
-    sortOption,
-  ]);
+            case 'newest':
+            default:
+              return (
+                getTimestamp(
+                  second.createdAt,
+                ) -
+                getTimestamp(
+                  first.createdAt,
+                )
+              );
+          }
+        },
+      );
+    }, [
+      stocks,
+      search,
+      sector,
+      listingFilter,
+      sortOption,
+    ]);
 
   const listedCount = useMemo(
     () =>
       stocks.filter(
-        (stock) => stock.isListed,
+        (stock) =>
+          stock.isListed,
       ).length,
     [stocks],
   );
@@ -310,28 +351,33 @@ function StocksPage() {
   const delistedCount = useMemo(
     () =>
       stocks.filter(
-        (stock) => !stock.isListed,
+        (stock) =>
+          !stock.isListed,
       ).length,
     [stocks],
   );
 
   async function refreshStocks() {
-    await queryClient.invalidateQueries({
-      queryKey: ["stocks"],
-    });
+    await queryClient
+      .invalidateQueries({
+        queryKey: ['stocks'],
+      });
   }
 
   function showMessage(
     text: string,
-    type: Exclude<MessageType, "">,
+    type: Exclude<
+      MessageType,
+      ''
+    >,
   ) {
     setMessage(text);
     setMessageType(type);
   }
 
   function clearMessage() {
-    setMessage("");
-    setMessageType("");
+    setMessage('');
+    setMessageType('');
   }
 
   return (
@@ -516,11 +562,7 @@ function StocksPage() {
       {isLoading ? (
         <StatePanel text="Loading stocks..." />
       ) : isError ? (
-        <StatePanel
-          text="Unable to load stocks."
-          error
-          action={
-            <Button
+        {<Button
               variant="outline"
               onClick={() => {
                 void refetch();
@@ -530,7 +572,8 @@ function StocksPage() {
             </Button>
           }
         />
-      ) : filteredStocks.length === 0 ? (
+      ) : filteredStocks.length ===
+        0 ? (
         <StatePanel text="No stocks match the selected filters." />
       ) : (
         <>
@@ -636,54 +679,6 @@ function StocksPage() {
   );
 }
 
-// Renders a price and briefly flashes green/red when it changes,
-// so live updates are visible instead of silently swapping numbers.
-function FlashPrice({
-  price,
-}: {
-  price: number;
-}) {
-  const prevPrice = useRef(price);
-  const [flash, setFlash] =
-    useState<
-      'up' | 'down' | null
-    >(null);
-
-  useEffect(() => {
-    if (price !== prevPrice.current) {
-      setFlash(
-        price > prevPrice.current
-          ? 'up'
-          : 'down',
-      );
-
-      prevPrice.current = price;
-
-      const timeout = setTimeout(
-        () => setFlash(null),
-        800,
-      );
-
-      return () =>
-        clearTimeout(timeout);
-    }
-  }, [price]);
-
-  return (
-    <span
-      className={
-        flash === 'up'
-          ? 'text-profit transition-colors duration-300'
-          : flash === 'down'
-            ? 'text-loss transition-colors duration-300'
-            : 'transition-colors duration-300'
-      }
-    >
-      {formatCurrency(price)}
-    </span>
-  );
-}
-
 function StockCard({
   stock,
   canManage,
@@ -723,11 +718,9 @@ function StockCard({
       </div>
 
       <div className="mt-4 text-2xl font-semibold tracking-tight">
-        <FlashPrice
-          price={
-            stock.currentPrice
-          }
-        />
+        {formatCurrency(
+          stock.currentPrice,
+        )}
       </div>
 
       <div className="mt-2">
@@ -792,11 +785,9 @@ function StockTableRow({
       </td>
 
       <td className="px-4 py-3 text-right font-medium">
-        <FlashPrice
-          price={
-            stock.currentPrice
-          }
-        />
+        {formatCurrency(
+          stock.currentPrice,
+        )}
       </td>
 
       <td className="px-4 py-3 text-center">
@@ -1483,11 +1474,9 @@ function StockDetailsDialog({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="text-3xl font-semibold">
-            <FlashPrice
-              price={
-                stock.currentPrice
-              }
-            />
+            {formatCurrency(
+              stock.currentPrice,
+            )}
           </div>
 
           <ListingBadge
@@ -1731,21 +1720,23 @@ function StatePanel({
     </div>
   );
 }
-function getStoredCmsUser() {
-  if (typeof window === "undefined") {
-    return null;
-  }
 
-  const storedCmsUser = sessionStorage.getItem("cmsUser");
+function getStoredCmsUser():
+  CmsUser | null {
+  const storedCmsUser =
+    sessionStorage.getItem(
+      'cmsUser',
+    );
 
   if (!storedCmsUser) {
     return null;
   }
 
   try {
-    return JSON.parse(storedCmsUser);
+    return JSON.parse(
+      storedCmsUser,
+    ) as CmsUser;
   } catch {
-    sessionStorage.removeItem("cmsUser");
     return null;
   }
 }

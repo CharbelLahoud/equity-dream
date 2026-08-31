@@ -9,61 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WalletRouteImport } from './routes/wallet'
-import { Route as TransactionsRouteImport } from './routes/transactions'
-import { Route as StocksRouteImport } from './routes/stocks'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as PortfolioRouteImport } from './routes/portfolio'
-import { Route as OrdersRouteImport } from './routes/orders'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as CmsChangePasswordRouteImport } from './routes/cms-change-password'
+import { Route as CmsLoginRouteImport } from './routes/cms-login'
+import { Route as CmsUsersRouteImport } from './routes/cms-users'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MembersRouteImport } from './routes/members'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
+import { Route as StocksRouteImport } from './routes/stocks'
+import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
+import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as CmsUsersIdRouteImport } from './routes/cms-users_.$id'
+import { Route as MembersIdRouteImport } from './routes/members_.$id'
 
-const WalletRoute = WalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TransactionsRoute = TransactionsRouteImport.update({
-  id: '/transactions',
-  path: '/transactions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StocksRoute = StocksRouteImport.update({
-  id: '/stocks',
-  path: '/stocks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PortfolioRoute = PortfolioRouteImport.update({
-  id: '/portfolio',
-  path: '/portfolio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrdersRoute = OrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -71,9 +40,94 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CmsChangePasswordRoute = CmsChangePasswordRouteImport.update({
+  id: '/cms-change-password',
+  path: '/cms-change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CmsLoginRoute = CmsLoginRouteImport.update({
+  id: '/cms-login',
+  path: '/cms-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CmsUsersRoute = CmsUsersRouteImport.update({
+  id: '/cms-users',
+  path: '/cms-users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembersRoute = MembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StocksRoute = StocksRouteImport.update({
+  id: '/stocks',
+  path: '/stocks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsRoute = TransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyOtpRoute = VerifyOtpRouteImport.update({
+  id: '/verify-otp',
+  path: '/verify-otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CmsUsersIdRoute = CmsUsersIdRouteImport.update({
+  id: '/cms-users_/$id',
+  path: '/cms-users/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembersIdRoute = MembersIdRouteImport.update({
+  id: '/members_/$id',
+  path: '/members/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -81,41 +135,68 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/cms-change-password': typeof CmsChangePasswordRoute
+  '/cms-login': typeof CmsLoginRoute
+  '/cms-users': typeof CmsUsersRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/portfolio': typeof PortfolioRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/set-password': typeof SetPasswordRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/wallet': typeof WalletRoute
+  '/cms-users/$id': typeof CmsUsersIdRoute
+  '/members/$id': typeof MembersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/cms-change-password': typeof CmsChangePasswordRoute
+  '/cms-login': typeof CmsLoginRoute
+  '/cms-users': typeof CmsUsersRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/portfolio': typeof PortfolioRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/set-password': typeof SetPasswordRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/wallet': typeof WalletRoute
+  '/cms-users/$id': typeof CmsUsersIdRoute
+  '/members/$id': typeof MembersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/analytics': typeof AnalyticsRoute
+  '/cms-change-password': typeof CmsChangePasswordRoute
+  '/cms-login': typeof CmsLoginRoute
+  '/cms-users': typeof CmsUsersRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/notifications': typeof NotificationsRoute
   '/orders': typeof OrdersRoute
   '/portfolio': typeof PortfolioRoute
+  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
+  '/set-password': typeof SetPasswordRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
+  '/verify-otp': typeof VerifyOtpRoute
   '/wallet': typeof WalletRoute
+  '/cms-users_/$id': typeof CmsUsersIdRoute
+  '/members_/$id': typeof MembersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,119 +204,99 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/analytics'
+    | '/cms-change-password'
+    | '/cms-login'
+    | '/cms-users'
     | '/login'
+    | '/members'
     | '/notifications'
     | '/orders'
     | '/portfolio'
+    | '/profile'
     | '/register'
+    | '/set-password'
     | '/stocks'
     | '/transactions'
+    | '/verify-otp'
     | '/wallet'
+    | '/cms-users/$id'
+    | '/members/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/analytics'
+    | '/cms-change-password'
+    | '/cms-login'
+    | '/cms-users'
     | '/login'
+    | '/members'
     | '/notifications'
     | '/orders'
     | '/portfolio'
+    | '/profile'
     | '/register'
+    | '/set-password'
     | '/stocks'
     | '/transactions'
+    | '/verify-otp'
     | '/wallet'
+    | '/cms-users/$id'
+    | '/members/$id'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/analytics'
+    | '/cms-change-password'
+    | '/cms-login'
+    | '/cms-users'
     | '/login'
+    | '/members'
     | '/notifications'
     | '/orders'
     | '/portfolio'
+    | '/profile'
     | '/register'
+    | '/set-password'
     | '/stocks'
     | '/transactions'
+    | '/verify-otp'
     | '/wallet'
+    | '/cms-users_/$id'
+    | '/members_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  CmsChangePasswordRoute: typeof CmsChangePasswordRoute
+  CmsLoginRoute: typeof CmsLoginRoute
+  CmsUsersRoute: typeof CmsUsersRoute
   LoginRoute: typeof LoginRoute
+  MembersRoute: typeof MembersRoute
   NotificationsRoute: typeof NotificationsRoute
   OrdersRoute: typeof OrdersRoute
   PortfolioRoute: typeof PortfolioRoute
+  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   StocksRoute: typeof StocksRoute
   TransactionsRoute: typeof TransactionsRoute
+  VerifyOtpRoute: typeof VerifyOtpRoute
   WalletRoute: typeof WalletRoute
+  CmsUsersIdRoute: typeof CmsUsersIdRoute
+  MembersIdRoute: typeof MembersIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/wallet': {
-      id: '/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof WalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/transactions': {
-      id: '/transactions'
-      path: '/transactions'
-      fullPath: '/transactions'
-      preLoaderRoute: typeof TransactionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stocks': {
-      id: '/stocks'
-      path: '/stocks'
-      fullPath: '/stocks'
-      preLoaderRoute: typeof StocksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/portfolio': {
-      id: '/portfolio'
-      path: '/portfolio'
-      fullPath: '/portfolio'
-      preLoaderRoute: typeof PortfolioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/orders': {
-      id: '/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof OrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -245,11 +306,130 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cms-change-password': {
+      id: '/cms-change-password'
+      path: '/cms-change-password'
+      fullPath: '/cms-change-password'
+      preLoaderRoute: typeof CmsChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cms-login': {
+      id: '/cms-login'
+      path: '/cms-login'
+      fullPath: '/cms-login'
+      preLoaderRoute: typeof CmsLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cms-users': {
+      id: '/cms-users'
+      path: '/cms-users'
+      fullPath: '/cms-users'
+      preLoaderRoute: typeof CmsUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/members': {
+      id: '/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof MembersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stocks': {
+      id: '/stocks'
+      path: '/stocks'
+      fullPath: '/stocks'
+      preLoaderRoute: typeof StocksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-otp': {
+      id: '/verify-otp'
+      path: '/verify-otp'
+      fullPath: '/verify-otp'
+      preLoaderRoute: typeof VerifyOtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cms-users_/$id': {
+      id: '/cms-users_/$id'
+      path: '/cms-users/$id'
+      fullPath: '/cms-users/$id'
+      preLoaderRoute: typeof CmsUsersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/members_/$id': {
+      id: '/members_/$id'
+      path: '/members/$id'
+      fullPath: '/members/$id'
+      preLoaderRoute: typeof MembersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -259,15 +439,34 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AnalyticsRoute: AnalyticsRoute,
+  CmsChangePasswordRoute: CmsChangePasswordRoute,
+  CmsLoginRoute: CmsLoginRoute,
+  CmsUsersRoute: CmsUsersRoute,
   LoginRoute: LoginRoute,
+  MembersRoute: MembersRoute,
   NotificationsRoute: NotificationsRoute,
   OrdersRoute: OrdersRoute,
   PortfolioRoute: PortfolioRoute,
+  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
+  SetPasswordRoute: SetPasswordRoute,
   StocksRoute: StocksRoute,
   TransactionsRoute: TransactionsRoute,
+  VerifyOtpRoute: VerifyOtpRoute,
   WalletRoute: WalletRoute,
+  CmsUsersIdRoute: CmsUsersIdRoute,
+  MembersIdRoute: MembersIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
