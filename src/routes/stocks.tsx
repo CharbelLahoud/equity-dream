@@ -1,48 +1,27 @@
-﻿import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+﻿import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import { createFileRoute } from "@tanstack/react-router";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
-  createFileRoute,
-} from '@tanstack/react-router';
-
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-
-import {
+  ArrowDownCircle,
+  ArrowUpCircle,
   Building2,
   Edit3,
   Plus,
   RefreshCw,
   Search,
   Star,
-} from 'lucide-react';
+} from "lucide-react";
 
-import {
-  AppShell,
-} from '@/components/app-shell';
+import { AppShell } from "@/components/app-shell";
 
-import {
-  Badge,
-} from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 
-import {
-  Button,
-} from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
   Dialog,
@@ -50,15 +29,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
-import {
-  Input,
-} from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
 
-import {
-  Label,
-} from '@/components/ui/label';
+import { Label } from "@/components/ui/label";
 
 import {
   Select,
@@ -66,7 +41,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 import {
   createStock,
@@ -78,48 +53,39 @@ import {
   type CreateStockData,
   type Stock,
   type UpdateStockData,
-} from '@/services/stocks.service';
+} from "@/services/stocks.service";
 
-export const Route =
-  createFileRoute('/stocks')({
-    head: () => ({
-      meta: [
-        {
-          title:
-            'Stocks · Meridian Trading',
-        },
-        {
-          name: 'description',
-          content:
-            'Browse and manage available stocks.',
-        },
-        {
-          property: 'og:title',
-          content:
-            'Stocks · Meridian',
-        },
-        {
-          property: 'og:description',
-          content:
-            'Browse and manage stocks.',
-        },
-      ],
-    }),
+import { buyStock, sellStock, type PlaceOrderData } from "@/services/orders.service";
 
-    component: StocksPage,
-  });
+import { getWalletBalance } from "@/services/wallet.service";
 
-type ListingFilter =
-  | 'all'
-  | 'listed'
-  | 'delisted';
+export const Route = createFileRoute("/stocks")({
+  head: () => ({
+    meta: [
+      {
+        title: "Stocks · Meridian Trading",
+      },
+      {
+        name: "description",
+        content: "Browse and manage available stocks.",
+      },
+      {
+        property: "og:title",
+        content: "Stocks · Meridian",
+      },
+      {
+        property: "og:description",
+        content: "Browse and manage stocks.",
+      },
+    ],
+  }),
 
-type SortOption =
-  | 'newest'
-  | 'ticker'
-  | 'company'
-  | 'price-low'
-  | 'price-high';
+  component: StocksPage,
+});
+
+type ListingFilter = "all" | "listed" | "delisted";
+
+type SortOption = "newest" | "ticker" | "company" | "price-low" | "price-high";
 
 type CmsUser = {
   id?: string;
@@ -130,10 +96,7 @@ type CmsUser = {
   status?: string;
 };
 
-type MessageType =
-  | 'success'
-  | 'error'
-  | '';
+type MessageType = "success" | "error" | "";
 
 // How often the frontend polls for fresh prices.
 // Keep this in sync with (or slightly above) the backend's
@@ -147,39 +110,32 @@ function StocksPage() {
   const [search, setSearch] = useState("");
   const [sector, setSector] = useState("All");
 
-  const [listingFilter, setListingFilter] =
-    useState<ListingFilter>("all");
+  const [listingFilter, setListingFilter] = useState<ListingFilter>("all");
 
-  const [sortOption, setSortOption] =
-    useState<SortOption>("newest");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
 
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] =
-    useState<MessageType>("");
+  const [messageType, setMessageType] = useState<MessageType>("");
 
-  const [currentCmsUser, setCurrentCmsUser] =
-    useState<CmsUser | null>(null);
+  const [currentCmsUser, setCurrentCmsUser] = useState<CmsUser | null>(null);
 
   const [isCmsUser, setIsCmsUser] = useState(false);
 
   useEffect(() => {
-    const storedUserType =
-      sessionStorage.getItem("userType");
+    const storedUserType = sessionStorage.getItem("userType");
 
     setIsCmsUser(storedUserType === "CMS");
     setCurrentCmsUser(getStoredCmsUser());
   }, []);
 
-  const isAdministrator =
-    isCmsUser &&
-    currentCmsUser?.role === "ADMINISTRATOR";
+  const isAdministrator = isCmsUser && currentCmsUser?.role === "ADMINISTRATOR";
 
-  const isAnalyst =
-    isCmsUser &&
-    currentCmsUser?.role === "ANALYST";
+  const isAnalyst = isCmsUser && currentCmsUser?.role === "ANALYST";
 
-  const canManageStocks =
-    isAdministrator || isAnalyst;
+  const canManageStocks = isAdministrator || isAnalyst;
+
+  // Only regular members (not CMS staff) place buy/sell orders.
+  const canTrade = !isCmsUser;
 
   const {
     data: stocksResponse,
@@ -194,32 +150,21 @@ function StocksPage() {
     refetchIntervalInBackground: true,
   });
 
-  const stocks: Stock[] =
-    Array.isArray(stocksResponse)
-      ? stocksResponse
-      : [];
+  const stocks: Stock[] = Array.isArray(stocksResponse) ? stocksResponse : [];
 
   const sectors = useMemo(() => {
     const values = stocks
       .map((stock) => stock.sector)
-      .filter(
-        (value): value is string =>
-          typeof value === "string" &&
-          value.trim().length > 0,
-      );
+      .filter((value): value is string => typeof value === "string" && value.trim().length > 0);
 
     return [
       "All",
-      ...Array.from(new Set(values)).sort(
-        (first, second) =>
-          first.localeCompare(second),
-      ),
+      ...Array.from(new Set(values)).sort((first, second) => first.localeCompare(second)),
     ];
   }, [stocks]);
 
   const filteredStocks = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase();
+    const normalizedSearch = search.trim().toLowerCase();
 
     const result = stocks.filter((stock) => {
       const ticker = stock.ticker ?? "";
@@ -228,92 +173,43 @@ function StocksPage() {
 
       const matchesSearch =
         !normalizedSearch ||
-        ticker
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        companyName
-          .toLowerCase()
-          .includes(normalizedSearch);
+        ticker.toLowerCase().includes(normalizedSearch) ||
+        companyName.toLowerCase().includes(normalizedSearch);
 
-      const matchesSector =
-        sector === "All" ||
-        stockSector === sector;
+      const matchesSector = sector === "All" || stockSector === sector;
 
       const matchesListing =
         listingFilter === "all" ||
-        (listingFilter === "listed" &&
-          stock.isListed) ||
-        (listingFilter === "delisted" &&
-          !stock.isListed);
+        (listingFilter === "listed" && stock.isListed) ||
+        (listingFilter === "delisted" && !stock.isListed);
 
-      return (
-        matchesSearch &&
-        matchesSector &&
-        matchesListing
-      );
+      return matchesSearch && matchesSector && matchesListing;
     });
 
-    return [...result].sort(
-      (first, second) => {
-        switch (sortOption) {
-          case "ticker":
-            return (
-              first.ticker ?? ""
-            ).localeCompare(
-              second.ticker ?? "",
-            );
+    return [...result].sort((first, second) => {
+      switch (sortOption) {
+        case "ticker":
+          return (first.ticker ?? "").localeCompare(second.ticker ?? "");
 
-          case "company":
-            return (
-              first.companyName ?? ""
-            ).localeCompare(
-              second.companyName ?? "",
-            );
+        case "company":
+          return (first.companyName ?? "").localeCompare(second.companyName ?? "");
 
-          case "price-low":
-            return (
-              Number(first.currentPrice ?? 0) -
-              Number(second.currentPrice ?? 0)
-            );
+        case "price-low":
+          return Number(first.currentPrice ?? 0) - Number(second.currentPrice ?? 0);
 
-          case "price-high":
-            return (
-              Number(second.currentPrice ?? 0) -
-              Number(first.currentPrice ?? 0)
-            );
+        case "price-high":
+          return Number(second.currentPrice ?? 0) - Number(first.currentPrice ?? 0);
 
-          case "newest":
-          default:
-            return (
-              getTimestamp(second.createdAt) -
-              getTimestamp(first.createdAt)
-            );
-        }
-      },
-    );
-  }, [
-    stocks,
-    search,
-    sector,
-    listingFilter,
-    sortOption,
-  ]);
+        case "newest":
+        default:
+          return getTimestamp(second.createdAt) - getTimestamp(first.createdAt);
+      }
+    });
+  }, [stocks, search, sector, listingFilter, sortOption]);
 
-  const listedCount = useMemo(
-    () =>
-      stocks.filter(
-        (stock) => stock.isListed,
-      ).length,
-    [stocks],
-  );
+  const listedCount = useMemo(() => stocks.filter((stock) => stock.isListed).length, [stocks]);
 
-  const delistedCount = useMemo(
-    () =>
-      stocks.filter(
-        (stock) => !stock.isListed,
-      ).length,
-    [stocks],
-  );
+  const delistedCount = useMemo(() => stocks.filter((stock) => !stock.isListed).length, [stocks]);
 
   async function refreshStocks() {
     await queryClient.invalidateQueries({
@@ -321,10 +217,29 @@ function StocksPage() {
     });
   }
 
-  function showMessage(
-    text: string,
-    type: Exclude<MessageType, "">,
-  ) {
+  // Called after a successful buy/sell order. Refreshes stocks
+  // (price/volume may change) plus wallet balance/transactions so the
+  // Wallet tab reflects the new balance without a manual refresh.
+  // Also refreshes orders/portfolio query keys in advance so those
+  // pages (once built) pick up fresh data automatically.
+  async function refreshAfterTrade() {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["stocks"],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["wallet"],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ["portfolio"],
+      }),
+    ]);
+  }
+
+  function showMessage(text: string, type: Exclude<MessageType, "">) {
     setMessage(text);
     setMessageType(type);
   }
@@ -339,17 +254,16 @@ function StocksPage() {
       title="Stocks"
       subtitle={
         canManageStocks
-          ? 'Browse and manage equities in the database.'
-          : 'Discover and review equities from the database.'
+          ? "Browse and manage equities in the database."
+          : "Discover and review equities from the database."
       }
     >
       {message && (
         <div
           className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
-            messageType ===
-            'success'
-              ? 'border-profit/30 bg-profit/10 text-profit'
-              : 'border-loss/30 bg-loss/10 text-loss'
+            messageType === "success"
+              ? "border-profit/30 bg-profit/10 text-profit"
+              : "border-loss/30 bg-loss/10 text-loss"
           }`}
         >
           {message}
@@ -359,55 +273,32 @@ function StocksPage() {
       {canManageStocks && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/20 p-4">
           <div>
-            <div className="font-medium">
-              CMS Stock Management
-            </div>
+            <div className="font-medium">CMS Stock Management</div>
 
             <div className="text-xs text-muted-foreground">
-              Signed in as{' '}
-              {currentCmsUser?.role ??
-                'CMS user'}
+              Signed in as {currentCmsUser?.role ?? "CMS user"}
             </div>
           </div>
 
           <AddStockDialog
-            onSuccess={async (
-              successMessage,
-            ) => {
+            onSuccess={async (successMessage) => {
               clearMessage();
 
               await refreshStocks();
 
-              showMessage(
-                successMessage,
-                'success',
-              );
+              showMessage(successMessage, "success");
             }}
-            onError={(error) =>
-              showMessage(
-                getErrorMessage(error),
-                'error',
-              )
-            }
+            onError={(error) => showMessage(getErrorMessage(error), "error")}
           />
         </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard
-          label="Total Stocks"
-          value={stocks.length}
-        />
+        <SummaryCard label="Total Stocks" value={stocks.length} />
 
-        <SummaryCard
-          label="Listed"
-          value={listedCount}
-        />
+        <SummaryCard label="Listed" value={listedCount} />
 
-        <SummaryCard
-          label="Delisted"
-          value={delistedCount}
-        />
+        <SummaryCard label="Delisted" value={delistedCount} />
       </div>
 
       <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -416,11 +307,7 @@ function StocksPage() {
 
           <Input
             value={search}
-            onChange={(event) =>
-              setSearch(
-                event.target.value,
-              )
-            }
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by ticker or company name..."
             className="h-11 pl-9"
           />
@@ -428,89 +315,55 @@ function StocksPage() {
 
         <Select
           value={listingFilter}
-          onValueChange={(value) =>
-            setListingFilter(
-              value as ListingFilter,
-            )
-          }
+          onValueChange={(value) => setListingFilter(value as ListingFilter)}
         >
           <SelectTrigger className="h-11 w-full lg:w-[150px]">
             <SelectValue />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="all">
-              All statuses
-            </SelectItem>
+            <SelectItem value="all">All statuses</SelectItem>
 
-            <SelectItem value="listed">
-              Listed
-            </SelectItem>
+            <SelectItem value="listed">Listed</SelectItem>
 
-            <SelectItem value="delisted">
-              Delisted
-            </SelectItem>
+            <SelectItem value="delisted">Delisted</SelectItem>
           </SelectContent>
         </Select>
 
-        <Select
-          value={sortOption}
-          onValueChange={(value) =>
-            setSortOption(
-              value as SortOption,
-            )
-          }
-        >
+        <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
           <SelectTrigger className="h-11 w-full lg:w-[180px]">
             <SelectValue />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="newest">
-              Newest
-            </SelectItem>
+            <SelectItem value="newest">Newest</SelectItem>
 
-            <SelectItem value="ticker">
-              Ticker
-            </SelectItem>
+            <SelectItem value="ticker">Ticker</SelectItem>
 
-            <SelectItem value="company">
-              Company name
-            </SelectItem>
+            <SelectItem value="company">Company name</SelectItem>
 
-            <SelectItem value="price-low">
-              Price: low to high
-            </SelectItem>
+            <SelectItem value="price-low">Price: low to high</SelectItem>
 
-            <SelectItem value="price-high">
-              Price: high to low
-            </SelectItem>
+            <SelectItem value="price-high">Price: high to low</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {sectors.map(
-          (sectorOption) => (
-            <button
-              key={sectorOption}
-              type="button"
-              onClick={() =>
-                setSector(
-                  sectorOption,
-                )
-              }
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                sector ===
-                sectorOption
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'bg-card text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {sectorOption}
-            </button>
-          ),
-        )}
+        {sectors.map((sectorOption) => (
+          <button
+            key={sectorOption}
+            type="button"
+            onClick={() => setSector(sectorOption)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              sector === sectorOption
+                ? "border-primary bg-primary text-primary-foreground"
+                : "bg-card text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {sectorOption}
+          </button>
+        ))}
       </div>
 
       {isLoading ? (
@@ -535,40 +388,25 @@ function StocksPage() {
       ) : (
         <>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {filteredStocks
-              .slice(0, 4)
-              .map((stock) => (
-                <StockCard
-                  key={stock._id}
-                  stock={stock}
-                  canManage={
-                    canManageStocks
-                  }
-                  isAdministrator={
-                    isAdministrator
-                  }
-                  onChanged={
-                    refreshStocks
-                  }
-                  showMessage={
-                    showMessage
-                  }
-                />
-              ))}
+            {filteredStocks.slice(0, 4).map((stock) => (
+              <StockCard
+                key={stock._id}
+                stock={stock}
+                canManage={canManageStocks}
+                isAdministrator={isAdministrator}
+                canTrade={canTrade}
+                onChanged={refreshStocks}
+                onTraded={refreshAfterTrade}
+                showMessage={showMessage}
+              />
+            ))}
           </div>
 
           <Card className="mt-6">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>
-                All stocks
-              </CardTitle>
+              <CardTitle>All stocks</CardTitle>
 
-              <span className="text-xs text-muted-foreground">
-                {
-                  filteredStocks.length
-                }{' '}
-                results
-              </span>
+              <span className="text-xs text-muted-foreground">{filteredStocks.length} results</span>
             </CardHeader>
 
             <CardContent className="p-0">
@@ -576,55 +414,33 @@ function StocksPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-muted/30 text-xs uppercase text-muted-foreground">
                     <tr>
-                      <th className="px-6 py-3 text-left font-medium">
-                        Ticker
-                      </th>
+                      <th className="px-6 py-3 text-left font-medium">Ticker</th>
 
-                      <th className="px-4 py-3 text-left font-medium">
-                        Company
-                      </th>
+                      <th className="px-4 py-3 text-left font-medium">Company</th>
 
-                      <th className="px-4 py-3 text-left font-medium">
-                        Sector
-                      </th>
+                      <th className="px-4 py-3 text-left font-medium">Sector</th>
 
-                      <th className="px-4 py-3 text-right font-medium">
-                        Price
-                      </th>
+                      <th className="px-4 py-3 text-right font-medium">Price</th>
 
-                      <th className="px-4 py-3 text-center font-medium">
-                        Status
-                      </th>
+                      <th className="px-4 py-3 text-center font-medium">Status</th>
 
-                      <th className="px-6 py-3 text-right font-medium">
-                        Actions
-                      </th>
+                      <th className="px-6 py-3 text-right font-medium">Actions</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {filteredStocks.map(
-                      (stock) => (
-                        <StockTableRow
-                          key={
-                            stock._id
-                          }
-                          stock={stock}
-                          canManage={
-                            canManageStocks
-                          }
-                          isAdministrator={
-                            isAdministrator
-                          }
-                          onChanged={
-                            refreshStocks
-                          }
-                          showMessage={
-                            showMessage
-                          }
-                        />
-                      ),
-                    )}
+                    {filteredStocks.map((stock) => (
+                      <StockTableRow
+                        key={stock._id}
+                        stock={stock}
+                        canManage={canManageStocks}
+                        isAdministrator={isAdministrator}
+                        canTrade={canTrade}
+                        onChanged={refreshStocks}
+                        onTraded={refreshAfterTrade}
+                        showMessage={showMessage}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -638,45 +454,30 @@ function StocksPage() {
 
 // Renders a price and briefly flashes green/red when it changes,
 // so live updates are visible instead of silently swapping numbers.
-function FlashPrice({
-  price,
-}: {
-  price: number;
-}) {
+function FlashPrice({ price }: { price: number }) {
   const prevPrice = useRef(price);
-  const [flash, setFlash] =
-    useState<
-      'up' | 'down' | null
-    >(null);
+  const [flash, setFlash] = useState<"up" | "down" | null>(null);
 
   useEffect(() => {
     if (price !== prevPrice.current) {
-      setFlash(
-        price > prevPrice.current
-          ? 'up'
-          : 'down',
-      );
+      setFlash(price > prevPrice.current ? "up" : "down");
 
       prevPrice.current = price;
 
-      const timeout = setTimeout(
-        () => setFlash(null),
-        800,
-      );
+      const timeout = setTimeout(() => setFlash(null), 800);
 
-      return () =>
-        clearTimeout(timeout);
+      return () => clearTimeout(timeout);
     }
   }, [price]);
 
   return (
     <span
       className={
-        flash === 'up'
-          ? 'text-profit transition-colors duration-300'
-          : flash === 'down'
-            ? 'text-loss transition-colors duration-300'
-            : 'transition-colors duration-300'
+        flash === "up"
+          ? "text-profit transition-colors duration-300"
+          : flash === "down"
+            ? "text-loss transition-colors duration-300"
+            : "transition-colors duration-300"
       }
     >
       {formatCurrency(price)}
@@ -688,29 +489,26 @@ function StockCard({
   stock,
   canManage,
   isAdministrator,
+  canTrade,
   onChanged,
+  onTraded,
   showMessage,
 }: {
   stock: Stock;
   canManage: boolean;
   isAdministrator: boolean;
+  canTrade: boolean;
   onChanged: () => Promise<void>;
-  showMessage: (
-    text: string,
-    type: 'success' | 'error',
-  ) => void;
+  onTraded: () => Promise<void>;
+  showMessage: (text: string, type: "success" | "error") => void;
 }) {
   return (
     <div className="card-elev p-5 transition hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-lg font-semibold">
-            {stock.ticker}
-          </div>
+          <div className="text-lg font-semibold">{stock.ticker}</div>
 
-          <div className="truncate text-xs text-muted-foreground">
-            {stock.companyName}
-          </div>
+          <div className="truncate text-xs text-muted-foreground">{stock.companyName}</div>
         </div>
 
         <button
@@ -723,37 +521,28 @@ function StockCard({
       </div>
 
       <div className="mt-4 text-2xl font-semibold tracking-tight">
-        <FlashPrice
-          price={
-            stock.currentPrice
-          }
-        />
+        <FlashPrice price={stock.currentPrice} />
       </div>
 
       <div className="mt-2">
-        <Badge variant="outline">
-          {stock.sector ||
-            'Uncategorized'}
-        </Badge>
+        <Badge variant="outline">{stock.sector || "Uncategorized"}</Badge>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <ListingBadge
-          isListed={
-            stock.isListed
-          }
-        />
-
-        <StockActions
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <StockManagementActions
           stock={stock}
           canManage={canManage}
-          isAdministrator={
-            isAdministrator
-          }
+          isAdministrator={isAdministrator}
           onChanged={onChanged}
           showMessage={showMessage}
         />
       </div>
+
+      {canTrade && stock.isListed && (
+        <div className="mt-3">
+          <TradeButtons stock={stock} layout="grid" onTraded={onTraded} showMessage={showMessage} />
+        </div>
+      )}
     </div>
   );
 }
@@ -762,69 +551,62 @@ function StockTableRow({
   stock,
   canManage,
   isAdministrator,
+  canTrade,
   onChanged,
+  onTraded,
   showMessage,
 }: {
   stock: Stock;
   canManage: boolean;
   isAdministrator: boolean;
+  canTrade: boolean;
   onChanged: () => Promise<void>;
-  showMessage: (
-    text: string,
-    type: 'success' | 'error',
-  ) => void;
+  onTraded: () => Promise<void>;
+  showMessage: (text: string, type: "success" | "error") => void;
 }) {
   return (
     <tr className="border-t hover:bg-muted/30">
-      <td className="px-6 py-3 font-semibold">
-        {stock.ticker}
-      </td>
+      <td className="px-6 py-3 font-semibold">{stock.ticker}</td>
 
-      <td className="px-4 py-3 text-muted-foreground">
-        {stock.companyName}
-      </td>
+      <td className="px-4 py-3 text-muted-foreground">{stock.companyName}</td>
 
       <td className="px-4 py-3">
-        <Badge variant="outline">
-          {stock.sector ||
-            'Uncategorized'}
-        </Badge>
+        <Badge variant="outline">{stock.sector || "Uncategorized"}</Badge>
       </td>
 
       <td className="px-4 py-3 text-right font-medium">
-        <FlashPrice
-          price={
-            stock.currentPrice
-          }
-        />
+        <FlashPrice price={stock.currentPrice} />
       </td>
 
       <td className="px-4 py-3 text-center">
-        <ListingBadge
-          isListed={
-            stock.isListed
-          }
-        />
+        <ListingBadge isListed={stock.isListed} />
       </td>
 
       <td className="px-6 py-3">
-        <div className="flex justify-end">
-          <StockActions
+        <div className="flex flex-wrap justify-end gap-2">
+          <StockManagementActions
             stock={stock}
             canManage={canManage}
-            isAdministrator={
-              isAdministrator
-            }
+            isAdministrator={isAdministrator}
             onChanged={onChanged}
             showMessage={showMessage}
           />
+
+          {canTrade && stock.isListed && (
+            <TradeButtons
+              stock={stock}
+              layout="inline"
+              onTraded={onTraded}
+              showMessage={showMessage}
+            />
+          )}
         </div>
       </td>
     </tr>
   );
 }
 
-function StockActions({
+function StockManagementActions({
   stock,
   canManage,
   isAdministrator,
@@ -835,57 +617,32 @@ function StockActions({
   canManage: boolean;
   isAdministrator: boolean;
   onChanged: () => Promise<void>;
-  showMessage: (
-    text: string,
-    type: 'success' | 'error',
-  ) => void;
+  showMessage: (text: string, type: "success" | "error") => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <StockDetailsDialog
-        stock={stock}
-      />
+      <StockDetailsDialog stock={stock} />
 
       {canManage && (
         <>
           <EditStockDialog
             stock={stock}
-            onSuccess={async (
-              successMessage,
-            ) => {
+            onSuccess={async (successMessage) => {
               await onChanged();
 
-              showMessage(
-                successMessage,
-                'success',
-              );
+              showMessage(successMessage, "success");
             }}
-            onError={(error) =>
-              showMessage(
-                getErrorMessage(error),
-                'error',
-              )
-            }
+            onError={(error) => showMessage(getErrorMessage(error), "error")}
           />
 
           <UpdatePriceDialog
             stock={stock}
-            onSuccess={async (
-              successMessage,
-            ) => {
+            onSuccess={async (successMessage) => {
               await onChanged();
 
-              showMessage(
-                successMessage,
-                'success',
-              );
+              showMessage(successMessage, "success");
             }}
-            onError={(error) =>
-              showMessage(
-                getErrorMessage(error),
-                'error',
-              )
-            }
+            onError={(error) => showMessage(getErrorMessage(error), "error")}
           />
         </>
       )}
@@ -893,25 +650,270 @@ function StockActions({
       {isAdministrator && (
         <ListingStatusButton
           stock={stock}
-          onSuccess={async (
-            successMessage,
-          ) => {
+          onSuccess={async (successMessage) => {
             await onChanged();
 
-            showMessage(
-              successMessage,
-              'success',
-            );
+            showMessage(successMessage, "success");
           }}
-          onError={(error) =>
-            showMessage(
-              getErrorMessage(error),
-              'error',
-            )
-          }
+          onError={(error) => showMessage(getErrorMessage(error), "error")}
         />
       )}
     </div>
+  );
+}
+
+// Buy/Sell pair. 'grid' lays them out as two full-width, equal-width
+// buttons (Buy on the left, Sell on the right) for the card view.
+// 'inline' keeps them compact and side by side for the table view.
+function TradeButtons({
+  stock,
+  layout = "inline",
+  onTraded,
+  showMessage,
+}: {
+  stock: Stock;
+  layout?: "inline" | "grid";
+  onTraded: () => Promise<void>;
+  showMessage: (text: string, type: "success" | "error") => void;
+}) {
+  const handleSuccess = async (successMessage: string) => {
+    await onTraded();
+
+    showMessage(successMessage, "success");
+  };
+
+  const handleError = (error: unknown) => {
+    showMessage(getErrorMessage(error), "error");
+  };
+
+  return (
+    <div className={layout === "grid" ? "grid grid-cols-2 gap-2" : "flex flex-wrap gap-2"}>
+      <TradeDialog
+        stock={stock}
+        mode="BUY"
+        fullWidth={layout === "grid"}
+        onSuccess={handleSuccess}
+        onError={handleError}
+      />
+
+      <TradeDialog
+        stock={stock}
+        mode="SELL"
+        fullWidth={layout === "grid"}
+        onSuccess={handleSuccess}
+        onError={handleError}
+      />
+    </div>
+  );
+}
+
+// Buy or Sell dialog for a single stock. Places an order through
+// orders.service, then reports success back to the parent so it can
+// refresh stocks + wallet balance/transactions + orders/portfolio.
+// The wallet balance itself is never modified from the frontend —
+// it is always re-fetched from GET /wallet/balance after the order
+// succeeds, so the number displayed is always the backend's number.
+function TradeDialog({
+  stock,
+  mode,
+  fullWidth = false,
+  onSuccess,
+  onError,
+}: {
+  stock: Stock;
+  mode: "BUY" | "SELL";
+  fullWidth?: boolean;
+  onSuccess: (message: string) => Promise<void>;
+  onError: (error: unknown) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [quantity, setQuantity] = useState("1");
+
+  const isBuy = mode === "BUY";
+
+  // Only fetched while the dialog is open, and only useful for Buy
+  // (to show available funds / catch insufficient-balance early).
+  // The backend still enforces the real check on submit.
+  const balanceQuery = useQuery({
+    queryKey: ["wallet", "balance"],
+    queryFn: getWalletBalance,
+    enabled: open && isBuy,
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: PlaceOrderData) => (isBuy ? buyStock(data) : sellStock(data)),
+
+    onSuccess: async (response) => {
+      setOpen(false);
+      setQuantity("1");
+
+      await onSuccess(
+        response.message ??
+          (isBuy ? "Buy order placed successfully." : "Sell order placed successfully."),
+      );
+    },
+
+    onError,
+  });
+
+  const parsedQuantity = Number(quantity);
+
+  const isQuantityValid =
+    Number.isFinite(parsedQuantity) && Number.isInteger(parsedQuantity) && parsedQuantity > 0;
+
+  const estimatedTotal = isQuantityValid ? parsedQuantity * Number(stock.currentPrice ?? 0) : 0;
+
+  const availableBalance = Number(balanceQuery.data?.balance ?? 0);
+
+  const insufficientFunds =
+    isBuy && isQuantityValid && !balanceQuery.isLoading && estimatedTotal > availableBalance;
+
+  function submit() {
+    if (!isQuantityValid) {
+      onError(new Error("Enter a valid whole number of shares."));
+
+      return;
+    }
+
+    if (insufficientFunds) {
+      onError(new Error("Insufficient wallet balance for this order."));
+
+      return;
+    }
+
+    mutation.mutate({
+      stockId: stock._id,
+      shares: parsedQuantity,
+    });
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+
+        if (!nextOpen) {
+          setQuantity("1");
+        }
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          className={`${
+            isBuy
+              ? "border border-profit/60 bg-profit text-white hover:bg-profit/90"
+              : "border border-loss/60 bg-loss text-white hover:bg-loss/90"
+          } ${fullWidth ? "w-full justify-center" : ""}`}
+        >
+          {isBuy ? (
+            <ArrowUpCircle className="mr-1 h-3.5 w-3.5" />
+          ) : (
+            <ArrowDownCircle className="mr-1 h-3.5 w-3.5" />
+          )}
+
+          {isBuy ? "Buy" : "Sell"}
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide ${
+                isBuy ? "bg-profit/15 text-profit" : "bg-loss/15 text-loss"
+              }`}
+            >
+              {isBuy ? (
+                <ArrowUpCircle className="h-3 w-3" />
+              ) : (
+                <ArrowDownCircle className="h-3 w-3" />
+              )}
+              {isBuy ? "Buy order" : "Sell order"}
+            </span>
+          </div>
+
+          <DialogTitle className="text-xl">
+            {stock.ticker}
+
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              · {stock.companyName}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div
+          className={`rounded-md border p-3 ${
+            isBuy ? "border-l-4 border-l-profit" : "border-l-4 border-l-loss"
+          }`}
+        >
+          <div className="text-xs text-muted-foreground">Current price</div>
+
+          <div className="mt-1 text-lg font-semibold">{formatCurrency(stock.currentPrice)}</div>
+        </div>
+
+        <FormField
+          label="Quantity (shares)"
+          value={quantity}
+          type="number"
+          onChange={setQuantity}
+        />
+
+        <div
+          className={`rounded-md border p-3 ${
+            isBuy ? "border-l-4 border-l-profit" : "border-l-4 border-l-loss"
+          }`}
+        >
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Estimated total</span>
+
+            <span className={`font-semibold ${isBuy ? "text-profit" : "text-loss"}`}>
+              {isBuy ? "-" : "+"}
+              {formatCurrency(estimatedTotal)}
+            </span>
+          </div>
+
+          {isBuy && (
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+              <span>Wallet balance</span>
+
+              <span>
+                {balanceQuery.isLoading ? "Loading..." : formatCurrency(availableBalance)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {insufficientFunds && (
+          <p className="text-xs text-loss">This order exceeds your available wallet balance.</p>
+        )}
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" disabled={mutation.isPending} onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+
+          <Button
+            disabled={mutation.isPending || !isQuantityValid || insufficientFunds}
+            className={
+              isBuy
+                ? "bg-profit text-white hover:bg-profit/90"
+                : "bg-loss text-white hover:bg-loss/90"
+            }
+            onClick={submit}
+          >
+            {mutation.isPending
+              ? isBuy
+                ? "Buying..."
+                : "Selling..."
+              : isBuy
+                ? "Confirm Buy"
+                : "Confirm Sell"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -919,114 +921,70 @@ function AddStockDialog({
   onSuccess,
   onError,
 }: {
-  onSuccess: (
-    message: string,
-  ) => Promise<void>;
+  onSuccess: (message: string) => Promise<void>;
   onError: (error: unknown) => void;
 }) {
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
-  const [ticker, setTicker] =
-    useState('');
+  const [ticker, setTicker] = useState("");
 
-  const [
-    companyName,
-    setCompanyName,
-  ] = useState('');
+  const [companyName, setCompanyName] = useState("");
 
-  const [sector, setSector] =
-    useState('');
+  const [sector, setSector] = useState("");
 
-  const [
-    currentPrice,
-    setCurrentPrice,
-  ] = useState('');
+  const [currentPrice, setCurrentPrice] = useState("");
 
-  const [
-    description,
-    setDescription,
-  ] = useState('');
+  const [description, setDescription] = useState("");
 
   const mutation = useMutation({
     mutationFn: createStock,
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
       setOpen(false);
       clearForm();
 
-      await onSuccess(
-        response.message ??
-          'Stock created successfully.',
-      );
+      await onSuccess(response.message ?? "Stock created successfully.");
     },
 
     onError,
   });
 
   function clearForm() {
-    setTicker('');
-    setCompanyName('');
-    setSector('');
-    setCurrentPrice('');
-    setDescription('');
+    setTicker("");
+    setCompanyName("");
+    setSector("");
+    setCurrentPrice("");
+    setDescription("");
   }
 
   function submit() {
-    const price =
-      Number(currentPrice);
+    const price = Number(currentPrice);
 
-    if (
-      !ticker.trim() ||
-      !companyName.trim() ||
-      !sector.trim() ||
-      !description.trim()
-    ) {
-      onError(
-        new Error(
-          'Complete all stock fields.',
-        ),
-      );
+    if (!ticker.trim() || !companyName.trim() || !sector.trim() || !description.trim()) {
+      onError(new Error("Complete all stock fields."));
 
       return;
     }
 
-    if (
-      !Number.isFinite(price) ||
-      price < 0
-    ) {
-      onError(
-        new Error(
-          'Enter a valid stock price.',
-        ),
-      );
+    if (!Number.isFinite(price) || price < 0) {
+      onError(new Error("Enter a valid stock price."));
 
       return;
     }
 
     const data: CreateStockData = {
-      ticker:
-        ticker
-          .trim()
-          .toUpperCase(),
-      companyName:
-        companyName.trim(),
+      ticker: ticker.trim().toUpperCase(),
+      companyName: companyName.trim(),
       sector: sector.trim(),
       currentPrice: price,
-      description:
-        description.trim(),
+      description: description.trim(),
     };
 
     mutation.mutate(data);
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -1036,73 +994,39 @@ function AddStockDialog({
 
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            Add Stock
-          </DialogTitle>
+          <DialogTitle>Add Stock</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            label="Ticker"
-            value={ticker}
-            placeholder="MSFT"
-            onChange={setTicker}
-          />
+          <FormField label="Ticker" value={ticker} placeholder="MSFT" onChange={setTicker} />
 
           <FormField
             label="Company name"
             value={companyName}
             placeholder="Microsoft Corporation"
-            onChange={
-              setCompanyName
-            }
+            onChange={setCompanyName}
           />
 
-          <FormField
-            label="Sector"
-            value={sector}
-            placeholder="Technology"
-            onChange={setSector}
-          />
+          <FormField label="Sector" value={sector} placeholder="Technology" onChange={setSector} />
 
           <FormField
             label="Current price"
             value={currentPrice}
             type="number"
             placeholder="420.00"
-            onChange={
-              setCurrentPrice
-            }
+            onChange={setCurrentPrice}
           />
         </div>
 
-        <DescriptionField
-          value={description}
-          onChange={setDescription}
-        />
+        <DescriptionField value={description} onChange={setDescription} />
 
         <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            disabled={
-              mutation.isPending
-            }
-            onClick={() =>
-              setOpen(false)
-            }
-          >
+          <Button variant="outline" disabled={mutation.isPending} onClick={() => setOpen(false)}>
             Cancel
           </Button>
 
-          <Button
-            disabled={
-              mutation.isPending
-            }
-            onClick={submit}
-          >
-            {mutation.isPending
-              ? 'Creating...'
-              : 'Create Stock'}
+          <Button disabled={mutation.isPending} onClick={submit}>
+            {mutation.isPending ? "Creating..." : "Create Stock"}
           </Button>
         </div>
       </DialogContent>
@@ -1116,96 +1040,50 @@ function EditStockDialog({
   onError,
 }: {
   stock: Stock;
-  onSuccess: (
-    message: string,
-  ) => Promise<void>;
+  onSuccess: (message: string) => Promise<void>;
   onError: (error: unknown) => void;
 }) {
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
-  const [ticker, setTicker] =
-    useState(stock.ticker);
+  const [ticker, setTicker] = useState(stock.ticker);
 
-  const [
-    companyName,
-    setCompanyName,
-  ] = useState(
-    stock.companyName,
-  );
+  const [companyName, setCompanyName] = useState(stock.companyName);
 
-  const [sector, setSector] =
-    useState(stock.sector);
+  const [sector, setSector] = useState(stock.sector);
 
-  const [
-    description,
-    setDescription,
-  ] = useState(
-    stock.description,
-  );
+  const [description, setDescription] = useState(stock.description);
 
   const mutation = useMutation({
-    mutationFn: (
-      data: UpdateStockData,
-    ) =>
-      updateStock(
-        stock._id,
-        data,
-      ),
+    mutationFn: (data: UpdateStockData) => updateStock(stock._id, data),
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
       setOpen(false);
 
-      await onSuccess(
-        response.message ??
-          'Stock updated successfully.',
-      );
+      await onSuccess(response.message ?? "Stock updated successfully.");
     },
 
     onError,
   });
 
   function submit() {
-    if (
-      !ticker.trim() ||
-      !companyName.trim() ||
-      !sector.trim() ||
-      !description.trim()
-    ) {
-      onError(
-        new Error(
-          'Complete all stock fields.',
-        ),
-      );
+    if (!ticker.trim() || !companyName.trim() || !sector.trim() || !description.trim()) {
+      onError(new Error("Complete all stock fields."));
 
       return;
     }
 
     mutation.mutate({
-      ticker:
-        ticker
-          .trim()
-          .toUpperCase(),
-      companyName:
-        companyName.trim(),
+      ticker: ticker.trim().toUpperCase(),
+      companyName: companyName.trim(),
       sector: sector.trim(),
-      description:
-        description.trim(),
+      description: description.trim(),
     });
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-        >
+        <Button size="sm" variant="outline">
           <Edit3 className="mr-1 h-3.5 w-3.5" />
           Edit
         </Button>
@@ -1213,60 +1091,26 @@ function EditStockDialog({
 
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            Edit {stock.ticker}
-          </DialogTitle>
+          <DialogTitle>Edit {stock.ticker}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            label="Ticker"
-            value={ticker}
-            onChange={setTicker}
-          />
+          <FormField label="Ticker" value={ticker} onChange={setTicker} />
 
-          <FormField
-            label="Company name"
-            value={companyName}
-            onChange={
-              setCompanyName
-            }
-          />
+          <FormField label="Company name" value={companyName} onChange={setCompanyName} />
 
-          <FormField
-            label="Sector"
-            value={sector}
-            onChange={setSector}
-          />
+          <FormField label="Sector" value={sector} onChange={setSector} />
         </div>
 
-        <DescriptionField
-          value={description}
-          onChange={setDescription}
-        />
+        <DescriptionField value={description} onChange={setDescription} />
 
         <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            disabled={
-              mutation.isPending
-            }
-            onClick={() =>
-              setOpen(false)
-            }
-          >
+          <Button variant="outline" disabled={mutation.isPending} onClick={() => setOpen(false)}>
             Cancel
           </Button>
 
-          <Button
-            disabled={
-              mutation.isPending
-            }
-            onClick={submit}
-          >
-            {mutation.isPending
-              ? 'Saving...'
-              : 'Save Changes'}
+          <Button disabled={mutation.isPending} onClick={submit}>
+            {mutation.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </DialogContent>
@@ -1280,116 +1124,59 @@ function UpdatePriceDialog({
   onError,
 }: {
   stock: Stock;
-  onSuccess: (
-    message: string,
-  ) => Promise<void>;
+  onSuccess: (message: string) => Promise<void>;
   onError: (error: unknown) => void;
 }) {
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
 
-  const [price, setPrice] =
-    useState(
-      String(stock.currentPrice),
-    );
+  const [price, setPrice] = useState(String(stock.currentPrice));
 
   const mutation = useMutation({
-    mutationFn: (
-      nextPrice: number,
-    ) =>
-      updateStockPrice(
-        stock._id,
-        nextPrice,
-      ),
+    mutationFn: (nextPrice: number) => updateStockPrice(stock._id, nextPrice),
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
       setOpen(false);
 
-      await onSuccess(
-        response.message ??
-          'Stock price updated successfully.',
-      );
+      await onSuccess(response.message ?? "Stock price updated successfully.");
     },
 
     onError,
   });
 
   function submit() {
-    const numericPrice =
-      Number(price);
+    const numericPrice = Number(price);
 
-    if (
-      !Number.isFinite(
-        numericPrice,
-      ) ||
-      numericPrice < 0
-    ) {
-      onError(
-        new Error(
-          'Enter a valid stock price.',
-        ),
-      );
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      onError(new Error("Enter a valid stock price."));
 
       return;
     }
 
-    mutation.mutate(
-      numericPrice,
-    );
+    mutation.mutate(numericPrice);
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={setOpen}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-        >
+        <Button size="sm" variant="outline">
           Price
         </Button>
       </DialogTrigger>
 
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            Update {stock.ticker} Price
-          </DialogTitle>
+          <DialogTitle>Update {stock.ticker} Price</DialogTitle>
         </DialogHeader>
 
-        <FormField
-          label="Current price"
-          value={price}
-          type="number"
-          onChange={setPrice}
-        />
+        <FormField label="Current price" value={price} type="number" onChange={setPrice} />
 
         <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            disabled={
-              mutation.isPending
-            }
-            onClick={() =>
-              setOpen(false)
-            }
-          >
+          <Button variant="outline" disabled={mutation.isPending} onClick={() => setOpen(false)}>
             Cancel
           </Button>
 
-          <Button
-            disabled={
-              mutation.isPending
-            }
-            onClick={submit}
-          >
-            {mutation.isPending
-              ? 'Updating...'
-              : 'Update Price'}
+          <Button disabled={mutation.isPending} onClick={submit}>
+            {mutation.isPending ? "Updating..." : "Update Price"}
           </Button>
         </div>
       </DialogContent>
@@ -1403,25 +1190,16 @@ function ListingStatusButton({
   onError,
 }: {
   stock: Stock;
-  onSuccess: (
-    message: string,
-  ) => Promise<void>;
+  onSuccess: (message: string) => Promise<void>;
   onError: (error: unknown) => void;
 }) {
   const mutation = useMutation({
-    mutationFn: () =>
-      stock.isListed
-        ? delistStock(stock._id)
-        : relistStock(stock._id),
+    mutationFn: () => (stock.isListed ? delistStock(stock._id) : relistStock(stock._id)),
 
-    onSuccess: async (
-      response,
-    ) => {
+    onSuccess: async (response) => {
       await onSuccess(
         response.message ??
-          (stock.isListed
-            ? 'Stock delisted successfully.'
-            : 'Stock relisted successfully.'),
+          (stock.isListed ? "Stock delisted successfully." : "Stock relisted successfully."),
       );
     },
 
@@ -1431,41 +1209,22 @@ function ListingStatusButton({
   return (
     <Button
       size="sm"
-      variant={
-        stock.isListed
-          ? 'outline'
-          : 'default'
-      }
-      disabled={
-        mutation.isPending
-      }
-      onClick={() =>
-        mutation.mutate()
-      }
+      variant={stock.isListed ? "outline" : "default"}
+      disabled={mutation.isPending}
+      onClick={() => mutation.mutate()}
     >
       <RefreshCw className="mr-1 h-3.5 w-3.5" />
 
-      {mutation.isPending
-        ? 'Updating...'
-        : stock.isListed
-          ? 'Delist'
-          : 'Relist'}
+      {mutation.isPending ? "Updating..." : stock.isListed ? "Delist" : "Relist"}
     </Button>
   );
 }
 
-function StockDetailsDialog({
-  stock,
-}: {
-  stock: Stock;
-}) {
+function StockDetailsDialog({ stock }: { stock: Stock }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-        >
+        <Button size="sm" variant="outline">
           Details
         </Button>
       </DialogTrigger>
@@ -1483,67 +1242,33 @@ function StockDetailsDialog({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="text-3xl font-semibold">
-            <FlashPrice
-              price={
-                stock.currentPrice
-              }
-            />
+            <FlashPrice price={stock.currentPrice} />
           </div>
 
-          <ListingBadge
-            isListed={
-              stock.isListed
-            }
-          />
+          <ListingBadge isListed={stock.isListed} />
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <DetailCard
-            label="Sector"
-            value={
-              stock.sector ||
-              'Uncategorized'
-            }
-          />
+          <DetailCard label="Sector" value={stock.sector || "Uncategorized"} />
 
-          <DetailCard
-            label="Current Price"
-            value={formatCurrency(
-              stock.currentPrice,
-            )}
-          />
+          <DetailCard label="Current Price" value={formatCurrency(stock.currentPrice)} />
 
-          <DetailCard
-            label="Created"
-            value={formatDate(
-              stock.createdAt,
-            )}
-          />
+          <DetailCard label="Created" value={formatDate(stock.createdAt)} />
 
-          <DetailCard
-            label="Updated"
-            value={formatDate(
-              stock.updatedAt,
-            )}
-          />
+          <DetailCard label="Updated" value={formatDate(stock.updatedAt)} />
         </div>
 
         <div className="rounded-md border p-4">
-          <div className="text-sm font-medium">
-            Description
-          </div>
+          <div className="text-sm font-medium">Description</div>
 
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            {stock.description ||
-              'No description available.'}
+            {stock.description || "No description available."}
           </p>
         </div>
 
         {!stock.isListed && (
           <p className="text-center text-xs text-muted-foreground">
-            Trading is unavailable
-            because this stock is
-            delisted.
+            Trading is unavailable because this stock is delisted.
           </p>
         )}
       </DialogContent>
@@ -1556,46 +1281,28 @@ function FormField({
   value,
   onChange,
   placeholder,
-  type = 'text',
+  type = "text",
 }: {
   label: string;
   value: string;
-  onChange: (
-    value: string,
-  ) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
 }) {
-  const inputId = label
-    .toLowerCase()
-    .replaceAll(' ', '-');
+  const inputId = label.toLowerCase().replaceAll(" ", "-");
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={inputId}>
-        {label}
-      </Label>
+      <Label htmlFor={inputId}>{label}</Label>
 
       <Input
         id={inputId}
         type={type}
-        min={
-          type === 'number'
-            ? '0'
-            : undefined
-        }
-        step={
-          type === 'number'
-            ? '0.01'
-            : undefined
-        }
+        min={type === "number" ? "0" : undefined}
+        step={type === "number" ? "0.01" : undefined}
         value={value}
         placeholder={placeholder}
-        onChange={(event) =>
-          onChange(
-            event.target.value,
-          )
-        }
+        onChange={(event) => onChange(event.target.value)}
       />
     </div>
   );
@@ -1606,15 +1313,11 @@ function DescriptionField({
   onChange,
 }: {
   value: string;
-  onChange: (
-    value: string,
-  ) => void;
+  onChange: (value: string) => void;
 }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor="stock-description">
-        Description
-      </Label>
+      <Label htmlFor="stock-description">Description</Label>
 
       <textarea
         id="stock-description"
@@ -1622,23 +1325,13 @@ function DescriptionField({
         rows={4}
         placeholder="Enter stock description"
         className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        onChange={(event) =>
-          onChange(
-            event.target.value,
-          )
-        }
+        onChange={(event) => onChange(event.target.value)}
       />
     </div>
   );
 }
 
-function SummaryCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
+function SummaryCard({ label, value }: { label: string; value: number }) {
   return (
     <Card>
       <CardContent className="flex items-center gap-3 p-5">
@@ -1647,55 +1340,27 @@ function SummaryCard({
         </div>
 
         <div>
-          <div className="text-xs text-muted-foreground">
-            {label}
-          </div>
+          <div className="text-xs text-muted-foreground">{label}</div>
 
-          <div className="text-xl font-semibold">
-            {value}
-          </div>
+          <div className="text-xl font-semibold">{value}</div>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function ListingBadge({
-  isListed,
-}: {
-  isListed: boolean;
-}) {
+function ListingBadge({ isListed }: { isListed: boolean }) {
   return (
-    <Badge
-      variant={
-        isListed
-          ? 'default'
-          : 'secondary'
-      }
-    >
-      {isListed
-        ? 'Listed'
-        : 'Delisted'}
-    </Badge>
+    <Badge variant={isListed ? "default" : "secondary"}>{isListed ? "Listed" : "Delisted"}</Badge>
   );
 }
 
-function DetailCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function DetailCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border p-3">
-      <div className="text-xs text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-xs text-muted-foreground">{label}</div>
 
-      <div className="mt-1 font-semibold">
-        {value}
-      </div>
+      <div className="mt-1 font-semibold">{value}</div>
     </div>
   );
 }
@@ -1712,22 +1377,14 @@ function StatePanel({
   return (
     <div
       className={`mt-6 grid place-items-center rounded-lg border border-dashed p-10 text-center ${
-        error
-          ? 'border-loss/30 bg-loss/10 text-loss'
-          : 'text-muted-foreground'
+        error ? "border-loss/30 bg-loss/10 text-loss" : "text-muted-foreground"
       }`}
     >
       <Building2 className="h-8 w-8" />
 
-      <div className="mt-3 text-sm">
-        {text}
-      </div>
+      <div className="mt-3 text-sm">{text}</div>
 
-      {action && (
-        <div className="mt-4">
-          {action}
-        </div>
-      )}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
@@ -1750,95 +1407,56 @@ function getStoredCmsUser() {
   }
 }
 
-function formatCurrency(
-  value: number,
-) {
-  return new Intl.NumberFormat(
-    'en-US',
-    {
-      style: 'currency',
-      currency: 'USD',
-    },
-  ).format(
-    Number(value ?? 0),
-  );
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(value ?? 0));
 }
 
-function formatDate(
-  value?: string,
-) {
+function formatDate(value?: string) {
   if (!value) {
-    return 'Not available';
+    return "Not available";
   }
 
-  const date =
-    new Date(value);
+  const date = new Date(value);
 
-  if (
-    Number.isNaN(
-      date.getTime(),
-    )
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
   return date.toLocaleString();
 }
 
-function getTimestamp(
-  value?: string,
-) {
+function getTimestamp(value?: string) {
   if (!value) {
     return 0;
   }
 
-  const timestamp =
-    new Date(value).getTime();
+  const timestamp = new Date(value).getTime();
 
-  return Number.isNaN(
-    timestamp,
-  )
-    ? 0
-    : timestamp;
+  return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-function getErrorMessage(
-  error: unknown,
-) {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error
-  ) {
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "response" in error) {
     const response = (
       error as {
         response?: {
           data?: {
-            message?:
-              | string
-              | string[];
+            message?: string | string[];
           };
         };
       }
     ).response;
 
-    const backendMessage =
-      response?.data?.message;
+    const backendMessage = response?.data?.message;
 
-    if (
-      Array.isArray(
-        backendMessage,
-      )
-    ) {
-      return backendMessage.join(
-        ', ',
-      );
+    if (Array.isArray(backendMessage)) {
+      return backendMessage.join(", ");
     }
 
-    if (
-      typeof backendMessage ===
-      'string'
-    ) {
+    if (typeof backendMessage === "string") {
       return backendMessage;
     }
   }
@@ -1847,5 +1465,5 @@ function getErrorMessage(
     return error.message;
   }
 
-  return 'The stock request could not be completed.';
+  return "The stock request could not be completed.";
 }

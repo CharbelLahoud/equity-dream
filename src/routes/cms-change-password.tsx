@@ -1,9 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,9 +22,7 @@ function CmsChangePasswordPage() {
 
   useEffect(() => {
     const storedEmail = sessionStorage.getItem("cmsEmail");
-    const storedTemporaryPassword = sessionStorage.getItem(
-      "cmsTemporaryPassword",
-    );
+    const storedTemporaryPassword = sessionStorage.getItem("cmsTemporaryPassword");
 
     if (storedEmail) {
       setEmail(storedEmail);
@@ -61,9 +56,7 @@ function CmsChangePasswordPage() {
         if (Array.isArray(backendMessage)) {
           setErrorMessage(backendMessage.join(", "));
         } else {
-          setErrorMessage(
-            backendMessage || "Failed to change password.",
-          );
+          setErrorMessage(backendMessage || "Failed to change password.");
         }
       } else {
         setErrorMessage("An unexpected error occurred.");
@@ -79,9 +72,7 @@ function CmsChangePasswordPage() {
     setErrorMessage("");
 
     if (newPassword.length < 8) {
-      setErrorMessage(
-        "New password must contain at least 8 characters.",
-      );
+      setErrorMessage("New password must contain at least 8 characters.");
       return;
     }
 
@@ -101,9 +92,7 @@ function CmsChangePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md rounded-xl border bg-card p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Change temporary password
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Change temporary password</h1>
 
         <p className="mt-2 text-sm text-muted-foreground">
           Create a new password before accessing the CMS dashboard.
@@ -113,27 +102,17 @@ function CmsChangePasswordPage() {
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
 
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              disabled
-              className="h-11"
-            />
+            <Input id="email" type="email" value={email} disabled className="h-11" />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="temporaryPassword">
-              Temporary password
-            </Label>
+            <Label htmlFor="temporaryPassword">Temporary password</Label>
 
             <Input
               id="temporaryPassword"
               type="password"
               value={temporaryPassword}
-              onChange={(event) =>
-                setTemporaryPassword(event.target.value)
-              }
+              onChange={(event) => setTemporaryPassword(event.target.value)}
               className="h-11"
               required
             />
@@ -146,9 +125,7 @@ function CmsChangePasswordPage() {
               id="newPassword"
               type="password"
               value={newPassword}
-              onChange={(event) =>
-                setNewPassword(event.target.value)
-              }
+              onChange={(event) => setNewPassword(event.target.value)}
               placeholder="At least 8 characters"
               minLength={8}
               className="h-11"
@@ -157,17 +134,13 @@ function CmsChangePasswordPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">
-              Confirm new password
-            </Label>
+            <Label htmlFor="confirmPassword">Confirm new password</Label>
 
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(event) =>
-                setConfirmPassword(event.target.value)
-              }
+              onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Enter the new password again"
               minLength={8}
               className="h-11"
@@ -175,18 +148,10 @@ function CmsChangePasswordPage() {
             />
           </div>
 
-          {errorMessage && (
-            <p className="text-sm text-loss">{errorMessage}</p>
-          )}
+          {errorMessage && <p className="text-sm text-loss">{errorMessage}</p>}
 
-          <Button
-            type="submit"
-            className="h-11 w-full"
-            disabled={changePasswordMutation.isPending}
-          >
-            {changePasswordMutation.isPending
-              ? "Changing password..."
-              : "Change password"}
+          <Button type="submit" className="h-11 w-full" disabled={changePasswordMutation.isPending}>
+            {changePasswordMutation.isPending ? "Changing password..." : "Change password"}
           </Button>
         </form>
       </div>

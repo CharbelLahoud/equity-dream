@@ -1,18 +1,14 @@
-import {
-  api,
-} from './api';
+import { api } from "./api";
 
 export type NotificationType =
-  | 'OTP'
-  | 'WALLET_CREDIT'
-  | 'TRADE_EXECUTED'
-  | 'PRICE_ALERT'
-  | 'CMS_ACCOUNT_PROVISIONING'
-  | 'GENERAL';
+  | "OTP"
+  | "WALLET_CREDIT"
+  | "TRADE_EXECUTED"
+  | "PRICE_ALERT"
+  | "CMS_ACCOUNT_PROVISIONING"
+  | "GENERAL";
 
-export type NotificationChannel =
-  | 'EMAIL'
-  | 'PUSH';
+export type NotificationChannel = "EMAIL" | "PUSH";
 
 export interface NotificationItem {
   _id: string;
@@ -40,15 +36,11 @@ export interface StockReference {
 export interface PriceAlert {
   _id: string;
 
-  stockId:
-    | string
-    | StockReference;
+  stockId: string | StockReference;
 
   targetPrice: number;
 
-  direction:
-    | 'ABOVE'
-    | 'BELOW';
+  direction: "ABOVE" | "BELOW";
 
   isActive: boolean;
   triggeredAt?: string;
@@ -67,119 +59,63 @@ export interface CreatePriceAlertData {
   stockId: string;
   targetPrice: number;
 
-  direction:
-    | 'ABOVE'
-    | 'BELOW';
+  direction: "ABOVE" | "BELOW";
 }
 
-export async function getNotifications():
-  Promise<NotificationItem[]> {
-  const response =
-    await api.get<NotificationItem[]>(
-      '/notifications',
-    );
+export async function getNotifications(): Promise<NotificationItem[]> {
+  const response = await api.get<NotificationItem[]>("/notifications");
 
-  return Array.isArray(
-    response.data,
-  )
-    ? response.data
-    : [];
+  return Array.isArray(response.data) ? response.data : [];
 }
 
-export async function createNotification(
-  data: CreateNotificationData,
-) {
-  const response = await api.post(
-    '/notifications',
-    data,
-  );
+export async function createNotification(data: CreateNotificationData) {
+  const response = await api.post("/notifications", data);
 
   return response.data;
 }
 
 export async function markAllNotificationsRead() {
-  const response = await api.patch(
-    '/notifications/mark-all-read',
-  );
+  const response = await api.patch("/notifications/mark-all-read");
 
   return response.data;
 }
 
-export async function getPriceAlerts():
-  Promise<PriceAlert[]> {
-  const response =
-    await api.get<PriceAlert[]>(
-      '/notifications/price-alerts',
-    );
+export async function getPriceAlerts(): Promise<PriceAlert[]> {
+  const response = await api.get<PriceAlert[]>("/notifications/price-alerts");
 
-  return Array.isArray(
-    response.data,
-  )
-    ? response.data
-    : [];
+  return Array.isArray(response.data) ? response.data : [];
 }
 
-export async function createPriceAlert(
-  data: CreatePriceAlertData,
-) {
-  const response = await api.post(
-    '/notifications/price-alerts',
-    data,
-  );
+export async function createPriceAlert(data: CreatePriceAlertData) {
+  const response = await api.post("/notifications/price-alerts", data);
 
   return response.data;
 }
 
-export async function updatePriceAlertStatus(
-  data: {
-    alertId: string;
-    isActive: boolean;
-  },
-) {
-  const response = await api.patch(
-    '/notifications/price-alerts/status',
-    data,
-  );
-
-  return response.data;
-}
-
-export async function deletePriceAlert(
-  alertId: string,
-) {
-  const response = await api.delete(
-    `/notifications/price-alerts/${alertId}`,
-  );
+export async function updatePriceAlertStatus(data: { alertId: string; isActive: boolean }) {
+  const response = await api.patch("/notifications/price-alerts/status", data);
 
   return response.data;
 }
 
 export async function getStocksForAlerts() {
-  const response =
-    await api.get<
-      StockReference[] | {
+  const response = await api.get<
+    | StockReference[]
+    | {
         data?: StockReference[];
         items?: StockReference[];
       }
-    >('/stocks');
+  >("/stocks");
 
   if (Array.isArray(response.data)) {
     return response.data;
   }
 
-  if (
-    Array.isArray(
-      response.data.data,
-    )
-  ) {
+  if (Array.isArray(response.data.data)) {
     return response.data.data;
   }
 
-  if (
-    Array.isArray(
-      response.data.items,
-    )
-  ) {
+  if (Array.isArray(response.data.items)) {
     return response.data.items;
   }
 

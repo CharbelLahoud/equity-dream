@@ -1,55 +1,24 @@
-import {
-  useMemo,
-  useState,
-} from 'react';
+import { useMemo, useState } from "react";
 
-import {
-  createFileRoute,
-} from '@tanstack/react-router';
+import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {
-  AppShell,
-} from '@/components/app-shell';
+import { AppShell } from "@/components/app-shell";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  Button,
-} from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
-import {
-  Badge,
-} from '@/components/ui/badge';
+import { Badge } from "@/components/ui/badge";
 
-import {
-  Switch,
-} from '@/components/ui/switch';
+import { Switch } from "@/components/ui/switch";
 
-import {
-  Input,
-} from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
 
-import {
-  Label,
-} from '@/components/ui/label';
+import { Label } from "@/components/ui/label";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   Select,
@@ -57,19 +26,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
-import {
-  Bell,
-  Plus,
-  Trash2,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
+import { Bell, Plus, TrendingDown, TrendingUp } from "lucide-react";
 
 import {
   createPriceAlert,
-  deletePriceAlert,
   getNotifications,
   getPriceAlerts,
   getStocksForAlerts,
@@ -77,267 +39,145 @@ import {
   updatePriceAlertStatus,
   type NotificationItem,
   type PriceAlert,
-} from '@/services/notifications.service';
+} from "@/services/notifications.service";
 
-export const Route =
-  createFileRoute('/notifications')({
-    head: () => ({
-      meta: [
-        {
-          title:
-            'Notifications · Meridian Trading',
-        },
-        {
-          name: 'description',
-          content:
-            'Alerts, order updates and price notifications.',
-        },
-      ],
-    }),
+export const Route = createFileRoute("/notifications")({
+  head: () => ({
+    meta: [
+      {
+        title: "Notifications · Meridian Trading",
+      },
+      {
+        name: "description",
+        content: "Alerts, order updates and price notifications.",
+      },
+    ],
+  }),
 
-    component: NotificationsPage,
-  });
+  component: NotificationsPage,
+});
 
 function NotificationsPage() {
-  const queryClient =
-    useQueryClient();
+  const queryClient = useQueryClient();
 
-  const [showForm, setShowForm] =
-    useState(false);
+  const [showForm, setShowForm] = useState(false);
 
-  const [stockId, setStockId] =
-    useState('');
+  const [stockId, setStockId] = useState("");
 
-  const [targetPrice, setTargetPrice] =
-    useState('');
+  const [targetPrice, setTargetPrice] = useState("");
 
-  const [direction, setDirection] =
-    useState<'ABOVE' | 'BELOW'>(
-      'ABOVE',
-    );
+  const [direction, setDirection] = useState<"ABOVE" | "BELOW">("ABOVE");
 
-  const [message, setMessage] =
-    useState('');
+  const [message, setMessage] = useState("");
 
-  const [
-    messageType,
-    setMessageType,
-  ] = useState<
-    'success' | 'error' | ''
-  >('');
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
-  const notificationsQuery =
-    useQuery({
-      queryKey: ['notifications'],
-      queryFn: getNotifications,
-      retry: false,
-    });
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications"],
+    queryFn: getNotifications,
+    retry: false,
+  });
 
   const alertsQuery = useQuery({
-    queryKey: [
-      'notifications',
-      'price-alerts',
-    ],
+    queryKey: ["notifications", "price-alerts"],
     queryFn: getPriceAlerts,
     retry: false,
   });
 
   const stocksQuery = useQuery({
-    queryKey: [
-      'stocks',
-      'alert-selection',
-    ],
+    queryKey: ["stocks", "alert-selection"],
     queryFn: getStocksForAlerts,
     retry: false,
   });
 
-  const notifications =
-    Array.isArray(
-      notificationsQuery.data,
-    )
-      ? notificationsQuery.data
-      : [];
+  const notifications = Array.isArray(notificationsQuery.data) ? notificationsQuery.data : [];
 
-  const alerts =
-    Array.isArray(alertsQuery.data)
-      ? alertsQuery.data
-      : [];
+  const alerts = Array.isArray(alertsQuery.data) ? alertsQuery.data : [];
 
-  const stocks =
-    Array.isArray(stocksQuery.data)
-      ? stocksQuery.data
-      : [];
+  const stocks = Array.isArray(stocksQuery.data) ? stocksQuery.data : [];
 
-  const unread = useMemo(
-    () =>
-      notifications.filter(
-        (item) => !item.isRead,
-      ),
+  const unread = useMemo(() => notifications.filter((item) => !item.isRead), [notifications]);
+
+  const priceNotifications = useMemo(
+    () => notifications.filter((item) => item.type === "PRICE_ALERT"),
     [notifications],
   );
 
-  const priceNotifications =
-    useMemo(
-      () =>
-        notifications.filter(
-          (item) =>
-            item.type ===
-            'PRICE_ALERT',
-        ),
-      [notifications],
-    );
+  const orderNotifications = useMemo(
+    () => notifications.filter((item) => item.type === "TRADE_EXECUTED"),
+    [notifications],
+  );
 
-  const orderNotifications =
-    useMemo(
-      () =>
-        notifications.filter(
-          (item) =>
-            item.type ===
-            'TRADE_EXECUTED',
-        ),
-      [notifications],
-    );
+  const createAlertMutation = useMutation({
+    mutationFn: createPriceAlert,
 
-  const createAlertMutation =
-    useMutation({
-      mutationFn:
-        createPriceAlert,
+    onSuccess: async () => {
+      setStockId("");
+      setTargetPrice("");
+      setDirection("ABOVE");
+      setShowForm(false);
 
-      onSuccess: async () => {
-        setStockId('');
-        setTargetPrice('');
-        setDirection('ABOVE');
-        setShowForm(false);
+      showMessage("Price alert created successfully.", "success");
 
-        showMessage(
-          'Price alert created successfully.',
-          'success',
-        );
+      await queryClient.invalidateQueries({
+        queryKey: ["notifications", "price-alerts"],
+      });
+    },
 
-        await queryClient
-          .invalidateQueries({
-            queryKey: [
-              'notifications',
-              'price-alerts',
-            ],
-          });
-      },
+    onError: (error: unknown) => {
+      showMessage(getErrorMessage(error), "error");
+    },
+  });
 
-      onError: (error: unknown) => {
-        showMessage(
-          getErrorMessage(error),
-          'error',
-        );
-      },
-    });
+  const markReadMutation = useMutation({
+    mutationFn: markAllNotificationsRead,
 
-  const markReadMutation =
-    useMutation({
-      mutationFn:
-        markAllNotificationsRead,
+    onSuccess: async () => {
+      showMessage("Notifications marked as read.", "success");
 
-      onSuccess: async () => {
-        showMessage(
-          'Notifications marked as read.',
-          'success',
-        );
+      await queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+      });
+    },
 
-        await queryClient
-          .invalidateQueries({
-            queryKey: ['notifications'],
-          });
-      },
+    onError: (error: unknown) => {
+      showMessage(getErrorMessage(error), "error");
+    },
+  });
 
-      onError: (error: unknown) => {
-        showMessage(
-          getErrorMessage(error),
-          'error',
-        );
-      },
-    });
+  const statusMutation = useMutation({
+    mutationFn: updatePriceAlertStatus,
 
-  const statusMutation =
-    useMutation({
-      mutationFn:
-        updatePriceAlertStatus,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["notifications", "price-alerts"],
+      });
+    },
 
-      onSuccess: async () => {
-        await queryClient
-          .invalidateQueries({
-            queryKey: [
-              'notifications',
-              'price-alerts',
-            ],
-          });
-      },
+    onError: (error: unknown) => {
+      showMessage(getErrorMessage(error), "error");
+    },
+  });
 
-      onError: (error: unknown) => {
-        showMessage(
-          getErrorMessage(error),
-          'error',
-        );
-      },
-    });
-
-  const deleteAlertMutation =
-    useMutation({
-      mutationFn: deletePriceAlert,
-
-      onSuccess: async () => {
-        showMessage(
-          'Price alert deleted.',
-          'success',
-        );
-
-        await queryClient
-          .invalidateQueries({
-            queryKey: [
-              'notifications',
-              'price-alerts',
-            ],
-          });
-      },
-
-      onError: (error: unknown) => {
-        showMessage(
-          getErrorMessage(error),
-          'error',
-        );
-      },
-    });
-
-  function showMessage(
-    text: string,
-    type: 'success' | 'error',
-  ) {
+  function showMessage(text: string, type: "success" | "error") {
     setMessage(text);
     setMessageType(type);
   }
 
   function handleCreateAlert() {
-    setMessage('');
-    setMessageType('');
+    setMessage("");
+    setMessageType("");
 
-    const price =
-      Number(targetPrice);
+    const price = Number(targetPrice);
 
     if (!stockId) {
-      showMessage(
-        'Select a stock.',
-        'error',
-      );
+      showMessage("Select a stock.", "error");
 
       return;
     }
 
-    if (
-      !Number.isFinite(price) ||
-      price <= 0
-    ) {
-      showMessage(
-        'Enter a valid target price.',
-        'error',
-      );
+    if (!Number.isFinite(price) || price <= 0) {
+      showMessage("Enter a valid target price.", "error");
 
       return;
     }
@@ -350,16 +190,13 @@ function NotificationsPage() {
   }
 
   return (
-    <AppShell
-      title="Notifications"
-      subtitle="Alerts, order updates and price triggers."
-    >
+    <AppShell title="Notifications" subtitle="Alerts, order updates and price triggers.">
       {message && (
         <div
           className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
-            messageType === 'success'
-              ? 'border-profit/30 bg-profit/10 text-profit'
-              : 'border-loss/30 bg-loss/10 text-loss'
+            messageType === "success"
+              ? "border-profit/30 bg-profit/10 text-profit"
+              : "border-loss/30 bg-loss/10 text-loss"
           }`}
         >
           {message}
@@ -370,24 +207,15 @@ function NotificationsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>
-                Activity
-              </CardTitle>
+              <CardTitle>Activity</CardTitle>
 
               <Button
                 variant="ghost"
                 size="sm"
-                disabled={
-                  unread.length === 0 ||
-                  markReadMutation.isPending
-                }
-                onClick={() =>
-                  markReadMutation.mutate()
-                }
+                disabled={unread.length === 0 || markReadMutation.isPending}
+                onClick={() => markReadMutation.mutate()}
               >
-                {markReadMutation.isPending
-                  ? 'Updating...'
-                  : 'Mark all read'}
+                {markReadMutation.isPending ? "Updating..." : "Mark all read"}
               </Button>
             </div>
           </CardHeader>
@@ -396,70 +224,35 @@ function NotificationsPage() {
             {notificationsQuery.isLoading ? (
               <StatePanel text="Loading notifications..." />
             ) : notificationsQuery.isError ? (
-              <StatePanel
-                text="Unable to load notifications."
-                error
-              />
+              <StatePanel text="Unable to load notifications." error />
             ) : (
               <Tabs defaultValue="all">
                 <div className="overflow-x-auto px-6">
                   <TabsList>
-                    <TabsTrigger value="all">
-                      All
-                    </TabsTrigger>
+                    <TabsTrigger value="all">All</TabsTrigger>
 
-                    <TabsTrigger value="unread">
-                      Unread ({unread.length})
-                    </TabsTrigger>
+                    <TabsTrigger value="unread">Unread ({unread.length})</TabsTrigger>
 
-                    <TabsTrigger value="alerts">
-                      Price Alerts
-                    </TabsTrigger>
+                    <TabsTrigger value="alerts">Price Alerts</TabsTrigger>
 
-                    <TabsTrigger value="orders">
-                      Orders
-                    </TabsTrigger>
+                    <TabsTrigger value="orders">Orders</TabsTrigger>
                   </TabsList>
                 </div>
 
-                <TabsContent
-                  value="all"
-                  className="mt-2"
-                >
-                  <NotificationList
-                    list={notifications}
-                  />
+                <TabsContent value="all" className="mt-2">
+                  <NotificationList list={notifications} />
                 </TabsContent>
 
-                <TabsContent
-                  value="unread"
-                  className="mt-2"
-                >
-                  <NotificationList
-                    list={unread}
-                  />
+                <TabsContent value="unread" className="mt-2">
+                  <NotificationList list={unread} />
                 </TabsContent>
 
-                <TabsContent
-                  value="alerts"
-                  className="mt-2"
-                >
-                  <NotificationList
-                    list={
-                      priceNotifications
-                    }
-                  />
+                <TabsContent value="alerts" className="mt-2">
+                  <NotificationList list={priceNotifications} />
                 </TabsContent>
 
-                <TabsContent
-                  value="orders"
-                  className="mt-2"
-                >
-                  <NotificationList
-                    list={
-                      orderNotifications
-                    }
-                  />
+                <TabsContent value="orders" className="mt-2">
+                  <NotificationList list={orderNotifications} />
                 </TabsContent>
               </Tabs>
             )}
@@ -470,24 +263,14 @@ function NotificationsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>
-                  Active Price Alerts
-                </CardTitle>
+                <CardTitle>Active Price Alerts</CardTitle>
 
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Get notified when a
-                  target is hit.
+                  Get notified when a target is hit.
                 </p>
               </div>
 
-              <Button
-                size="sm"
-                onClick={() =>
-                  setShowForm(
-                    (current) => !current,
-                  )
-                }
-              >
+              <Button size="sm" onClick={() => setShowForm((current) => !current)}>
                 <Plus className="mr-1 h-4 w-4" />
                 New
               </Button>
@@ -497,61 +280,38 @@ function NotificationsPage() {
               {showForm && (
                 <div className="space-y-3 rounded-md border bg-muted/20 p-4">
                   <div className="space-y-2">
-                    <Label>
-                      Stock
-                    </Label>
+                    <Label>Stock</Label>
 
-                    <Select
-                      value={stockId}
-                      onValueChange={
-                        setStockId
-                      }
-                    >
+                    <Select value={stockId} onValueChange={setStockId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select stock" />
                       </SelectTrigger>
 
                       <SelectContent>
-                        {stocks.map(
-                          (stock) => {
-                            if (!stock._id) {
-                              return null;
-                            }
+                        {stocks.map((stock) => {
+                          if (!stock._id) {
+                            return null;
+                          }
 
-                            const symbol =
-                              stock.ticker ??
-                              stock.symbol ??
-                              'Stock';
+                          const symbol = stock.ticker ?? stock.symbol ?? "Stock";
 
-                            return (
-                              <SelectItem
-                                key={stock._id}
-                                value={stock._id}
-                              >
-                                {symbol}
-                                {stock.companyName
-                                  ? ` · ${stock.companyName}`
-                                  : ''}
-                              </SelectItem>
-                            );
-                          },
-                        )}
+                          return (
+                            <SelectItem key={stock._id} value={stock._id}>
+                              {symbol}
+                              {stock.companyName ? ` · ${stock.companyName}` : ""}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
 
                     {stocksQuery.isError && (
-                      <p className="text-xs text-loss">
-                        Unable to load stocks.
-                      </p>
+                      <p className="text-xs text-loss">Unable to load stocks.</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="target-price"
-                    >
-                      Target price
-                    </Label>
+                    <Label htmlFor="target-price">Target price</Label>
 
                     <Input
                       id="target-price"
@@ -560,41 +320,25 @@ function NotificationsPage() {
                       step="0.01"
                       value={targetPrice}
                       placeholder="200.00"
-                      onChange={(event) =>
-                        setTargetPrice(
-                          event.target.value,
-                        )
-                      }
+                      onChange={(event) => setTargetPrice(event.target.value)}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
-                      Direction
-                    </Label>
+                    <Label>Direction</Label>
 
                     <Select
                       value={direction}
-                      onValueChange={(value) =>
-                        setDirection(
-                          value as
-                            | 'ABOVE'
-                            | 'BELOW',
-                        )
-                      }
+                      onValueChange={(value) => setDirection(value as "ABOVE" | "BELOW")}
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
 
                       <SelectContent>
-                        <SelectItem value="ABOVE">
-                          Above
-                        </SelectItem>
+                        <SelectItem value="ABOVE">Above</SelectItem>
 
-                        <SelectItem value="BELOW">
-                          Below
-                        </SelectItem>
+                        <SelectItem value="BELOW">Below</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -602,26 +346,13 @@ function NotificationsPage() {
                   <div className="flex gap-2">
                     <Button
                       className="flex-1"
-                      disabled={
-                        createAlertMutation
-                          .isPending
-                      }
-                      onClick={
-                        handleCreateAlert
-                      }
+                      disabled={createAlertMutation.isPending}
+                      onClick={handleCreateAlert}
                     >
-                      {createAlertMutation
-                        .isPending
-                        ? 'Creating...'
-                        : 'Create alert'}
+                      {createAlertMutation.isPending ? "Creating..." : "Create alert"}
                     </Button>
 
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        setShowForm(false)
-                      }
-                    >
+                    <Button variant="outline" onClick={() => setShowForm(false)}>
                       Cancel
                     </Button>
                   </div>
@@ -631,10 +362,7 @@ function NotificationsPage() {
               {alertsQuery.isLoading ? (
                 <StatePanel text="Loading price alerts..." />
               ) : alertsQuery.isError ? (
-                <StatePanel
-                  text="Unable to load price alerts."
-                  error
-                />
+                <StatePanel text="Unable to load price alerts." error />
               ) : alerts.length === 0 ? (
                 <StatePanel text="No price alerts yet." />
               ) : (
@@ -642,22 +370,12 @@ function NotificationsPage() {
                   <PriceAlertRow
                     key={alert._id}
                     alert={alert}
-                    disabled={
-                      statusMutation.isPending
-                    }
-                    onStatusChange={(
-                      isActive,
-                    ) =>
+                    disabled={statusMutation.isPending}
+                    onStatusChange={(isActive) =>
                       statusMutation.mutate({
-                        alertId:
-                          alert._id,
+                        alertId: alert._id,
                         isActive,
                       })
-                    }
-                    onDelete={() =>
-                      deleteAlertMutation.mutate(
-                        alert._id,
-                      )
                     }
                   />
                 ))
@@ -667,26 +385,15 @@ function NotificationsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>
-                Preferences
-              </CardTitle>
+              <CardTitle>Preferences</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <PreferenceRow
-                label="Order fills"
-                description="When your orders execute"
-              />
+              <PreferenceRow label="Order fills" description="When your orders execute" />
 
-              <PreferenceRow
-                label="Price alerts"
-                description="When targets are triggered"
-              />
+              <PreferenceRow label="Price alerts" description="When targets are triggered" />
 
-              <PreferenceRow
-                label="Portfolio moves"
-                description="When portfolio values change"
-              />
+              <PreferenceRow label="Portfolio moves" description="When portfolio values change" />
             </CardContent>
           </Card>
         </div>
@@ -695,15 +402,9 @@ function NotificationsPage() {
   );
 }
 
-function NotificationList({
-  list,
-}: {
-  list: NotificationItem[];
-}) {
+function NotificationList({ list }: { list: NotificationItem[] }) {
   if (list.length === 0) {
-    return (
-      <StatePanel text="No notifications in this view." />
-    );
+    return <StatePanel text="No notifications in this view." />;
   }
 
   return (
@@ -711,51 +412,32 @@ function NotificationList({
       {list.map((item) => (
         <div
           key={item._id}
-          className={`flex gap-3 px-6 py-4 ${
-            !item.isRead
-              ? 'bg-primary/5'
-              : ''
-          }`}
+          className={`flex gap-3 px-6 py-4 ${!item.isRead ? "bg-primary/5" : ""}`}
         >
           <div
             className="mt-1 h-2 w-2 shrink-0 rounded-full"
             style={{
-              background:
-                item.isRead
-                  ? 'transparent'
-                  : '#1E3A8A',
+              background: item.isRead ? "transparent" : "#1E3A8A",
             }}
           />
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                variant="outline"
-                className="text-[10px]"
-              >
+              <Badge variant="outline" className="text-[10px]">
                 {formatType(item.type)}
               </Badge>
 
               <span className="text-[11px] text-muted-foreground">
-                {formatDate(
-                  item.createdAt,
-                )}
+                {formatDate(item.createdAt)}
               </span>
             </div>
 
-            <div className="mt-1 text-sm font-medium">
-              {item.subject}
-            </div>
+            <div className="mt-1 text-sm font-medium">{item.subject}</div>
 
-            <div className="text-xs text-muted-foreground">
-              {item.body}
-            </div>
+            <div className="text-xs text-muted-foreground">{item.body}</div>
           </div>
 
-          <Badge
-            variant="outline"
-            className="h-fit text-[10px]"
-          >
+          <Badge variant="outline" className="h-fit text-[10px]">
             {item.status}
           </Badge>
         </div>
@@ -768,206 +450,119 @@ function PriceAlertRow({
   alert,
   disabled,
   onStatusChange,
-  onDelete,
 }: {
   alert: PriceAlert;
   disabled: boolean;
-  onStatusChange: (
-    isActive: boolean,
-  ) => void;
-  onDelete: () => void;
+  onStatusChange: (isActive: boolean) => void;
 }) {
-  const stock =
-    typeof alert.stockId ===
-    'object'
-      ? alert.stockId
-      : undefined;
+  const stock = typeof alert.stockId === "object" ? alert.stockId : undefined;
 
-  const symbol =
-    stock?.ticker ??
-    stock?.symbol ??
-    'Stock';
+  const symbol = stock?.ticker ?? stock?.symbol ?? "Stock";
 
-  const above =
-    alert.direction === 'ABOVE';
+  const above = alert.direction === "ABOVE";
 
   return (
     <div className="flex items-center gap-3 rounded-md border p-3">
       <div
         className={`grid h-9 w-9 shrink-0 place-items-center rounded-md ${
-          above
-            ? 'bg-profit/10 text-profit'
-            : 'bg-loss/10 text-loss'
+          above ? "bg-profit/10 text-profit" : "bg-loss/10 text-loss"
         }`}
       >
-        {above ? (
-          <TrendingUp className="h-4 w-4" />
-        ) : (
-          <TrendingDown className="h-4 w-4" />
-        )}
+        {above ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium">
-          {symbol}{' '}
-          {above ? 'above' : 'below'}{' '}
-          {formatCurrency(
-            alert.targetPrice,
-          )}
+          {symbol} {above ? "above" : "below"} {formatCurrency(alert.targetPrice)}
         </div>
 
         <div className="text-[11px] text-muted-foreground">
-          {typeof stock?.currentPrice ===
-          'number'
+          {typeof stock?.currentPrice === "number"
             ? `Current: ${formatCurrency(stock.currentPrice)}`
             : `Created: ${formatDate(alert.createdAt)}`}
         </div>
       </div>
 
-      <Switch
-        checked={alert.isActive}
-        disabled={disabled}
-        onCheckedChange={
-          onStatusChange
-        }
-      />
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-muted-foreground hover:text-loss"
-        onClick={onDelete}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
+      <Switch checked={alert.isActive} disabled={disabled} onCheckedChange={onStatusChange} />
     </div>
   );
 }
 
-function PreferenceRow({
-  label,
-  description,
-}: {
-  label: string;
-  description: string;
-}) {
+function PreferenceRow({ label, description }: { label: string; description: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <div>
-        <div className="text-sm font-medium">
-          {label}
-        </div>
+        <div className="text-sm font-medium">{label}</div>
 
-        <div className="text-xs text-muted-foreground">
-          {description}
-        </div>
+        <div className="text-xs text-muted-foreground">{description}</div>
       </div>
 
-      <Switch
-        defaultChecked
-        disabled
-      />
+      <Switch defaultChecked disabled />
     </div>
   );
 }
 
-function StatePanel({
-  text,
-  error = false,
-}: {
-  text: string;
-  error?: boolean;
-}) {
+function StatePanel({ text, error = false }: { text: string; error?: boolean }) {
   return (
     <div
       className={`grid place-items-center rounded-md border border-dashed px-6 py-10 text-center text-sm ${
-        error
-          ? 'border-loss/30 bg-loss/10 text-loss'
-          : 'text-muted-foreground'
+        error ? "border-loss/30 bg-loss/10 text-loss" : "text-muted-foreground"
       }`}
     >
       <Bell className="h-5 w-5" />
 
-      <div className="mt-3">
-        {text}
-      </div>
+      <div className="mt-3">{text}</div>
     </div>
   );
 }
 
-function formatCurrency(
-  value: number,
-) {
-  return new Intl.NumberFormat(
-    'en-US',
-    {
-      style: 'currency',
-      currency: 'USD',
-    },
-  ).format(Number(value ?? 0));
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(value ?? 0));
 }
 
-function formatDate(
-  value?: string,
-) {
+function formatDate(value?: string) {
   if (!value) {
-    return 'Date unavailable';
+    return "Date unavailable";
   }
 
   const date = new Date(value);
 
-  if (
-    Number.isNaN(date.getTime())
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return value;
   }
 
   return date.toLocaleString();
 }
 
-function formatType(
-  value: string,
-) {
+function formatType(value: string) {
   return value
-    .replaceAll('_', ' ')
+    .replaceAll("_", " ")
     .toLowerCase()
-    .replace(
-      /\b\w/g,
-      (character) =>
-        character.toUpperCase(),
-    );
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-function getErrorMessage(
-  error: unknown,
-) {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error
-  ) {
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "response" in error) {
     const response = (
       error as {
         response?: {
           data?: {
-            message?:
-              | string
-              | string[];
+            message?: string | string[];
           };
         };
       }
     ).response;
 
-    const message =
-      response?.data?.message;
+    const message = response?.data?.message;
 
     if (Array.isArray(message)) {
-      return message.join(', ');
+      return message.join(", ");
     }
 
-    if (
-      typeof message === 'string'
-    ) {
+    if (typeof message === "string") {
       return message;
     }
   }
@@ -976,6 +571,5 @@ function getErrorMessage(
     return error.message;
   }
 
-  return 'The notification request could not be completed.';
+  return "The notification request could not be completed.";
 }
-// hiiiii

@@ -1,14 +1,11 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { verifyEmailOtp } from "@/services/auth";
+import { resendEmailOtp, verifyEmailOtp } from "@/services/auth";
 
 export const Route = createFileRoute("/verify-otp")({
   component: VerifyOtpPage,
@@ -23,8 +20,7 @@ function VerifyOtpPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const registrationEmail =
-      sessionStorage.getItem("registrationEmail");
+    const registrationEmail = sessionStorage.getItem("registrationEmail");
 
     if (registrationEmail) {
       setEmail(registrationEmail);
@@ -62,9 +58,35 @@ function VerifyOtpPage() {
     },
   });
 
-  function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
+  const resendOtpMutation = useMutation({
+    mutationFn: resendEmailOtp,
+
+    onSuccess: () => {
+      setSuccessMessage("A new verification code was sent to your email.");
+      setErrorMessage("");
+      setCode("");
+    },
+
+    onError: (error: unknown) => {
+      setSuccessMessage("");
+
+      if (axios.isAxiosError(error)) {
+        const backendMessage = error.response?.data?.message;
+
+        setErrorMessage(
+          Array.isArray(backendMessage)
+            ? backendMessage.join(", ")
+            : backendMessage || "Failed to resend verification code.",
+        );
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
+
+      console.error("OTP resend failed:", error);
+    },
+  });
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setSuccessMessage("");
@@ -73,10 +95,13 @@ function VerifyOtpPage() {
     const trimmedEmail = email.trim();
     const trimmedCode = code.trim();
 
+    if (!trimmedEmail) {
+      setErrorMessage("Email address is required.");
+      return;
+    }
+
     if (trimmedCode.length !== 6) {
-      setErrorMessage(
-        "Verification code must contain exactly 6 characters.",
-      );
+      setErrorMessage("Verification code must contain exactly 6 characters.");
       return;
     }
 
@@ -86,15 +111,31 @@ function VerifyOtpPage() {
     });
   }
 
+  function handleResendOtp() {
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setErrorMessage("Enter your email address before requesting a new code.");
+      return;
+    }
+
+    resendOtpMutation.mutate({
+      email: trimmedEmail,
+    });
+  }
+
+  const isBusy = verifyOtpMutation.isPending || resendOtpMutation.isPending;
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md rounded-xl border bg-card p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Verify your email
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Verify your email</h1>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Enter your email address and the 6-character verification code.
+          Enter your email address and the six-digit verification code.
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
@@ -119,6 +160,7 @@ function VerifyOtpPage() {
               id="code"
               value={code}
               onChange={(event) => setCode(event.target.value)}
+              inputMode="numeric"
               minLength={6}
               maxLength={6}
               placeholder="123456"
@@ -127,26 +169,22 @@ function VerifyOtpPage() {
             />
           </div>
 
-          {successMessage && (
-            <p className="text-sm text-profit">
-              {successMessage}
-            </p>
-          )}
+          {successMessage && <p className="text-sm text-profit">{successMessage}</p>}
 
-          {errorMessage && (
-            <p className="text-sm text-loss">
-              {errorMessage}
-            </p>
-          )}
+          {errorMessage && <p className="text-sm text-loss">{errorMessage}</p>}
+
+          <Button type="submit" className="h-11 w-full" disabled={isBusy}>
+            {verifyOtpMutation.isPending ? "Verifying..." : "Verify email"}
+          </Button>
 
           <Button
-            type="submit"
+            type="button"
+            variant="outline"
             className="h-11 w-full"
-            disabled={verifyOtpMutation.isPending}
+            disabled={isBusy}
+            onClick={handleResendOtp}
           >
-            {verifyOtpMutation.isPending
-              ? "Verifying..."
-              : "Verify email"}
+            {resendOtpMutation.isPending ? "Resending..." : "Resend code"}
           </Button>
         </form>
       </div>

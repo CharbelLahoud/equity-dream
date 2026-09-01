@@ -22,7 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { api } from "@/services/api";
-import { getMyProfile } from "@/services/member";
+import { getMyProfile } from "@/services/members.service";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,107 +114,6 @@ type AppShellProps = {
   subtitle?: string;
 };
 
-// ---- NYSE market status (regular hours: 9:30am-4:00pm ET, Mon-Fri) ----
-// Note: does not account for NYSE holidays (e.g. Labor Day, Thanksgiving).
-
-const WEEKDAY_ORDER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MARKET_OPEN_MINUTES = 9 * 60 + 30; // 9:30am
-const MARKET_CLOSE_MINUTES = 16 * 60; // 4:00pm
-
-type MarketStatus = {
-  isOpen: boolean;
-  countdownLabel: string;
-};
-
-function getEasternTimeParts(date: Date) {
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  const parts = formatter.formatToParts(date);
-  const map: Record<string, string> = {};
-
-  for (const part of parts) {
-    map[part.type] = part.value;
-  }
-
-  return {
-    weekday: map.weekday,
-    hour: Number(map.hour) % 24,
-    minute: Number(map.minute),
-  };
-}
-
-function formatDuration(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours <= 0) {
-    return `${minutes}m`;
-  }
-
-  return `${hours}h ${minutes}m`;
-}
-
-function computeMarketStatus(now: Date): MarketStatus {
-  const { weekday, hour, minute } = getEasternTimeParts(now);
-  const dayIndex = WEEKDAY_ORDER.indexOf(weekday);
-  const minutesNow = hour * 60 + minute;
-  const isWeekday = dayIndex >= 1 && dayIndex <= 5;
-
-  const isOpen =
-    isWeekday && minutesNow >= MARKET_OPEN_MINUTES && minutesNow < MARKET_CLOSE_MINUTES;
-
-  if (isOpen) {
-    const minutesUntilClose = MARKET_CLOSE_MINUTES - minutesNow;
-
-    return {
-      isOpen: true,
-      countdownLabel: `Closes in ${formatDuration(minutesUntilClose)}`,
-    };
-  }
-
-  // Find the next weekday open time, starting from today.
-  for (let offset = 0; offset <= 7; offset++) {
-    const candidateDayIndex = (dayIndex + offset) % 7;
-    const candidateIsWeekday = candidateDayIndex >= 1 && candidateDayIndex <= 5;
-
-    if (!candidateIsWeekday) continue;
-
-    const candidateOpenMinutes = offset * 24 * 60 + MARKET_OPEN_MINUTES;
-
-    if (candidateOpenMinutes > minutesNow) {
-      return {
-        isOpen: false,
-        countdownLabel: `Opens in ${formatDuration(candidateOpenMinutes - minutesNow)}`,
-      };
-    }
-  }
-
-  return {
-    isOpen: false,
-    countdownLabel: "Opens soon",
-  };
-}
-
-function useMarketStatus(): MarketStatus {
-  const [status, setStatus] = useState<MarketStatus>(() => computeMarketStatus(new Date()));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStatus(computeMarketStatus(new Date()));
-    }, 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return status;
-}
-
 export function AppShell({ children, title, subtitle }: AppShellProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -224,8 +123,6 @@ export function AppShell({ children, title, subtitle }: AppShellProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-
-  const marketStatus = useMarketStatus();
 
   const [token, setToken] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
@@ -375,18 +272,11 @@ export function AppShell({ children, title, subtitle }: AppShellProps) {
 
         <div className="absolute inset-x-3 bottom-4 rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-3">
           <div className="flex items-center gap-2 text-xs text-sidebar-foreground/70">
-            <span
-              className={cn(
-                "h-2 w-2 rounded-full",
-                marketStatus.isOpen ? "animate-pulse bg-profit" : "bg-sidebar-foreground/30",
-              )}
-            />
-            {marketStatus.isOpen ? "Markets Open · NYSE" : "Markets Closed · NYSE"}
+            <span className="h-2 w-2 animate-pulse rounded-full bg-profit" />
+            Markets Open · NYSE
           </div>
 
-          <div className="mt-2 text-[11px] text-sidebar-foreground/50">
-            {marketStatus.countdownLabel}
-          </div>
+          <div className="mt-2 text-[11px] text-sidebar-foreground/50">Closes in 3h 12m</div>
         </div>
       </aside>
 

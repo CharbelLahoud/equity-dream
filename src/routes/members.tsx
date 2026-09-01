@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getMembers } from "@/services/member";
+import { getMembers } from "@/services/members.service";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/members")({

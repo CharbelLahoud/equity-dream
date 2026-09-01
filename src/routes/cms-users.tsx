@@ -34,32 +34,32 @@ function CmsUsersPage() {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-useEffect(() => {
-  const token = sessionStorage.getItem("accessToken");
-  const userType = sessionStorage.getItem("userType");
-  const storedCmsUser = sessionStorage.getItem("cmsUser");
+  useEffect(() => {
+    const token = sessionStorage.getItem("accessToken");
+    const userType = sessionStorage.getItem("userType");
+    const storedCmsUser = sessionStorage.getItem("cmsUser");
 
-  if (!token || userType !== "CMS" || !storedCmsUser) {
-    navigate({ to: "/cms-login" });
-    return;
-  }
-
-  try {
-    const cmsUser = JSON.parse(storedCmsUser);
-
-    if (cmsUser.role !== "ADMINISTRATOR") {
-      navigate({ to: "/admin" });
+    if (!token || userType !== "CMS" || !storedCmsUser) {
+      navigate({ to: "/cms-login" });
       return;
     }
-  } catch {
-    sessionStorage.removeItem("cmsUser");
-    navigate({ to: "/cms-login" });
-    return;
-  }
 
-  setIsCmsAuthenticated(true);
-  setIsCheckingSession(false);
-}, [navigate]);
+    try {
+      const cmsUser = JSON.parse(storedCmsUser);
+
+      if (cmsUser.role !== "ADMINISTRATOR") {
+        navigate({ to: "/admin" });
+        return;
+      }
+    } catch {
+      sessionStorage.removeItem("cmsUser");
+      navigate({ to: "/cms-login" });
+      return;
+    }
+
+    setIsCmsAuthenticated(true);
+    setIsCheckingSession(false);
+  }, [navigate]);
 
   const {
     data: cmsUsersResponse,

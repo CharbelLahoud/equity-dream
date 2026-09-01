@@ -28,19 +28,18 @@ export type SuspendMemberVariables = {
   dto: SuspendMemberDto;
 };
 export type ReinstateMemberDto = {
-reason: string;
+  reason: string;
 };
- 
 export type ReinstateMemberVariables = {
-id: string;
-dto: ReinstateMemberDto;
+  id: string;
+  dto: ReinstateMemberDto;
 };
 export type GetMembersParams = {
-search?: string;
-status?: string;
-identityVerificationStatus?: string;
-page?: number;
-limit?: number;
+  search?: string;
+  status?: string;
+  identityVerificationStatus?: string;
+  page?: number;
+  limit?: number;
 };
 export async function getMyProfile(): Promise<Member> {
   const response = await api.get<Member>("/members/me");
@@ -54,9 +53,7 @@ export async function updateMyProfile(dto: UpdateMemberProfileDto): Promise<Memb
   return response.data;
 }
 
-export async function getMembers(
-  params: GetMembersParams = {},
-): Promise<MembersResponse> {
+export async function getMembers(params: GetMembersParams = {}): Promise<MembersResponse> {
   const response = await api.get<MembersResponse>("/members", {
     params,
   });
@@ -80,14 +77,7 @@ export async function suspendMember({ id, dto }: SuspendMemberVariables): Promis
   const response = await api.patch<Member>(`/members/${id}/suspend`, dto);
   return response.data;
 }
-export async function reinstateMember({
-id,
-dto,
-}: ReinstateMemberVariables): Promise<Member> {
-const response = await api.patch<Member>(
-`/members/${id}/reinstate`,
-dto,
-);
- 
-return response.data;
+export async function reinstateMember({ id, dto }: ReinstateMemberVariables): Promise<Member> {
+  const response = await api.patch<Member>(`/members/${id}/reinstate`, dto);
+  return response.data;
 }

@@ -6,7 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getMyProfile, updateMyProfile } from "@/services/member";
+import { getMyProfile, updateMyProfile } from "@/services/members.service";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -19,19 +19,18 @@ function ProfilePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
- const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-useEffect(() => {
-  const storedToken =
-    localStorage.getItem("accessToken") ??
-    sessionStorage.getItem("accessToken");
+  useEffect(() => {
+    const storedToken =
+      localStorage.getItem("accessToken") ?? sessionStorage.getItem("accessToken");
 
-  setToken(storedToken);
+    setToken(storedToken);
 
-  if (!storedToken) {
-    navigate({ to: "/login" });
-  }
-}, [navigate]);
+    if (!storedToken) {
+      navigate({ to: "/login" });
+    }
+  }, [navigate]);
 
   const {
     data: member,

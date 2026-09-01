@@ -1,10 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +21,7 @@ function SetPasswordPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const registrationEmail =
-      sessionStorage.getItem("registrationEmail");
+    const registrationEmail = sessionStorage.getItem("registrationEmail");
 
     if (registrationEmail) {
       setEmail(registrationEmail);
@@ -37,9 +32,7 @@ function SetPasswordPage() {
     mutationFn: setMemberPassword,
 
     onSuccess: async () => {
-      setSuccessMessage(
-        "Password set successfully. Your account is now active.",
-      );
+      setSuccessMessage("Password set successfully. Your account is now active.");
       setErrorMessage("");
 
       sessionStorage.removeItem("registrationEmail");
@@ -58,9 +51,7 @@ function SetPasswordPage() {
         if (Array.isArray(backendMessage)) {
           setErrorMessage(backendMessage.join(", "));
         } else {
-          setErrorMessage(
-            backendMessage || "Failed to set password.",
-          );
+          setErrorMessage(backendMessage || "Failed to set password.");
         }
       } else {
         setErrorMessage("An unexpected error occurred.");
@@ -84,9 +75,7 @@ function SetPasswordPage() {
     }
 
     if (password.length < 8) {
-      setErrorMessage(
-        "Password must contain at least 8 characters.",
-      );
+      setErrorMessage("Password must contain at least 8 characters.");
       return;
     }
 
@@ -105,9 +94,7 @@ function SetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="w-full max-w-md rounded-xl border bg-card p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Set your password
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Set your password</h1>
 
         <p className="mt-2 text-sm text-muted-foreground">
           Create a password to activate your account.
@@ -144,17 +131,13 @@ function SetPasswordPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">
-              Confirm password
-            </Label>
+            <Label htmlFor="confirmPassword">Confirm password</Label>
 
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(event) =>
-                setConfirmPassword(event.target.value)
-              }
+              onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Enter the password again"
               className="h-11"
               minLength={8}
@@ -162,35 +145,18 @@ function SetPasswordPage() {
             />
           </div>
 
-          {successMessage && (
-            <p className="text-sm text-profit">
-              {successMessage}
-            </p>
-          )}
+          {successMessage && <p className="text-sm text-profit">{successMessage}</p>}
 
-          {errorMessage && (
-            <p className="text-sm text-loss">
-              {errorMessage}
-            </p>
-          )}
+          {errorMessage && <p className="text-sm text-loss">{errorMessage}</p>}
 
-          <Button
-            type="submit"
-            className="h-11 w-full"
-            disabled={setPasswordMutation.isPending}
-          >
-            {setPasswordMutation.isPending
-              ? "Setting password..."
-              : "Set password"}
+          <Button type="submit" className="h-11 w-full" disabled={setPasswordMutation.isPending}>
+            {setPasswordMutation.isPending ? "Setting password..." : "Set password"}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already activated your account?{" "}
-          <Link
-            to="/login"
-            className="font-medium text-primary hover:underline"
-          >
+          <Link to="/login" className="font-medium text-primary hover:underline">
             Sign in
           </Link>
         </p>

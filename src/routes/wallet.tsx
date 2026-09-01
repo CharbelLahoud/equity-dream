@@ -1,36 +1,16 @@
-import { useMemo, useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { AppShell, StatCard } from '@/components/app-shell';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { AppShell, StatCard } from "@/components/app-shell";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  CreditCard,
-  TrendingUp,
-  Wallet,
-} from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, CreditCard, TrendingUp, Wallet } from "lucide-react";
 
 import {
   Area,
@@ -40,7 +20,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from "recharts";
 
 import {
   depositMoney,
@@ -48,18 +28,17 @@ import {
   getWalletTransactions,
   withdrawMoney,
   type WalletTransaction,
-} from '@/services/wallet.service';
+} from "@/services/wallet.service";
 
-export const Route = createFileRoute('/wallet')({
+export const Route = createFileRoute("/wallet")({
   head: () => ({
     meta: [
       {
-        title: 'Wallet · Meridian Trading',
+        title: "Wallet · Meridian Trading",
       },
       {
-        name: 'description',
-        content:
-          'Deposit, withdraw and review your wallet activity.',
+        name: "description",
+        content: "Deposit, withdraw and review your wallet activity.",
       },
     ],
   }),
@@ -70,27 +49,23 @@ export const Route = createFileRoute('/wallet')({
 function WalletPage() {
   const queryClient = useQueryClient();
 
-  const [depositAmount, setDepositAmount] = useState('');
-  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
 
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState<
-    'success' | 'error' | ''
-  >('');
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
   const balanceQuery = useQuery({
-    queryKey: ['wallet', 'balance'],
+    queryKey: ["wallet", "balance"],
     queryFn: getWalletBalance,
   });
 
   const transactionsQuery = useQuery({
-    queryKey: ['wallet', 'transactions'],
+    queryKey: ["wallet", "transactions"],
     queryFn: getWalletTransactions,
   });
 
-  const transactions: WalletTransaction[] = Array.isArray(
-    transactionsQuery.data,
-  )
+  const transactions: WalletTransaction[] = Array.isArray(transactionsQuery.data)
     ? transactionsQuery.data
     : [];
 
@@ -99,11 +74,11 @@ function WalletPage() {
   const refreshWallet = async () => {
     await Promise.all([
       queryClient.invalidateQueries({
-        queryKey: ['wallet', 'balance'],
+        queryKey: ["wallet", "balance"],
       }),
 
       queryClient.invalidateQueries({
-        queryKey: ['wallet', 'transactions'],
+        queryKey: ["wallet", "transactions"],
       }),
     ]);
   };
@@ -112,16 +87,16 @@ function WalletPage() {
     mutationFn: depositMoney,
 
     onSuccess: async () => {
-      setDepositAmount('');
-      setMessage('Deposit completed successfully.');
-      setMessageType('success');
+      setDepositAmount("");
+      setMessage("Deposit completed successfully.");
+      setMessageType("success");
 
       await refreshWallet();
     },
 
     onError: (error: unknown) => {
       setMessage(getErrorMessage(error));
-      setMessageType('error');
+      setMessageType("error");
     },
   });
 
@@ -129,26 +104,25 @@ function WalletPage() {
     mutationFn: withdrawMoney,
 
     onSuccess: async () => {
-      setWithdrawAmount('');
-      setMessage('Withdrawal completed successfully.');
-      setMessageType('success');
+      setWithdrawAmount("");
+      setMessage("Withdrawal completed successfully.");
+      setMessageType("success");
 
       await refreshWallet();
     },
 
     onError: (error: unknown) => {
       setMessage(getErrorMessage(error));
-      setMessageType('error');
+      setMessageType("error");
     },
   });
 
   const deposits = useMemo(
     () =>
       transactions.filter((transaction) => {
-        const type =
-          transaction.type?.toUpperCase() ?? '';
+        const type = transaction.type?.toUpperCase() ?? "";
 
-        return type === 'DEPOSIT';
+        return type === "DEPOSIT";
       }),
     [transactions],
   );
@@ -156,13 +130,9 @@ function WalletPage() {
   const withdrawals = useMemo(
     () =>
       transactions.filter((transaction) => {
-        const type =
-          transaction.type?.toUpperCase() ?? '';
+        const type = transaction.type?.toUpperCase() ?? "";
 
-        return (
-          type === 'WITHDRAWAL' ||
-          type === 'WITHDRAW'
-        );
+        return type === "WITHDRAWAL" || type === "WITHDRAW";
       }),
     [transactions],
   );
@@ -170,11 +140,9 @@ function WalletPage() {
   const completedDeposits = useMemo(
     () =>
       deposits.filter((transaction) => {
-        const status =
-          transaction.status?.toUpperCase() ??
-          'COMPLETED';
+        const status = transaction.status?.toUpperCase() ?? "COMPLETED";
 
-        return status === 'COMPLETED';
+        return status === "COMPLETED";
       }),
     [deposits],
   );
@@ -182,48 +150,38 @@ function WalletPage() {
   const completedWithdrawals = useMemo(
     () =>
       withdrawals.filter((transaction) => {
-        const status =
-          transaction.status?.toUpperCase() ??
-          'COMPLETED';
+        const status = transaction.status?.toUpperCase() ?? "COMPLETED";
 
-        return status === 'COMPLETED';
+        return status === "COMPLETED";
       }),
     [withdrawals],
   );
 
   const totalDeposits = useMemo(
     () =>
-      completedDeposits.reduce(
-        (total, transaction) =>
-          total + Number(transaction.amount ?? 0),
-        0,
-      ),
+      completedDeposits.reduce((total, transaction) => total + Number(transaction.amount ?? 0), 0),
     [completedDeposits],
   );
 
   const totalWithdrawals = useMemo(
     () =>
       completedWithdrawals.reduce(
-        (total, transaction) =>
-          total + Number(transaction.amount ?? 0),
+        (total, transaction) => total + Number(transaction.amount ?? 0),
         0,
       ),
     [completedWithdrawals],
   );
 
-  const walletHistory = useMemo(
-    () => createWalletHistory(transactions),
-    [transactions],
-  );
+  const walletHistory = useMemo(() => createWalletHistory(transactions), [transactions]);
 
   const clearMessage = () => {
-    setMessage('');
-    setMessageType('');
+    setMessage("");
+    setMessageType("");
   };
 
   const showError = (text: string) => {
     setMessage(text);
-    setMessageType('error');
+    setMessageType("error");
   };
 
   const handleDeposit = () => {
@@ -232,7 +190,7 @@ function WalletPage() {
     const amount = Number(depositAmount);
 
     if (!Number.isFinite(amount) || amount < 1) {
-      showError('Enter a valid deposit amount.');
+      showError("Enter a valid deposit amount.");
       return;
     }
 
@@ -245,7 +203,7 @@ function WalletPage() {
     const amount = Number(withdrawAmount);
 
     if (!Number.isFinite(amount) || amount < 1) {
-      showError('Enter a valid withdrawal amount.');
+      showError("Enter a valid withdrawal amount.");
       return;
     }
 
@@ -253,16 +211,13 @@ function WalletPage() {
   };
 
   return (
-    <AppShell
-      title="Wallet"
-      subtitle="Manage your cash balance and transfers."
-    >
+    <AppShell title="Wallet" subtitle="Manage your cash balance and transfers.">
       {message && (
         <div
           className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
-            messageType === 'success'
-              ? 'border-profit/30 bg-profit/10 text-profit'
-              : 'border-loss/30 bg-loss/10 text-loss'
+            messageType === "success"
+              ? "border-profit/30 bg-profit/10 text-profit"
+              : "border-loss/30 bg-loss/10 text-loss"
           }`}
         >
           {message}
@@ -275,9 +230,7 @@ function WalletPage() {
             balance={balance}
             loading={balanceQuery.isLoading}
             error={balanceQuery.isError}
-            lastDepositAt={
-              balanceQuery.data?.lastDepositAt
-            }
+            lastDepositAt={balanceQuery.data?.lastDepositAt}
           />
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -314,45 +267,22 @@ function WalletPage() {
               {transactionsQuery.isLoading ? (
                 <StateRow text="Loading Wallet history..." />
               ) : transactionsQuery.isError ? (
-                <StateRow
-                  text="Unable to load Wallet history."
-                  error
-                />
+                <StateRow text="Unable to load Wallet history." error />
               ) : walletHistory.length === 0 ? (
                 <StateRow text="No Wallet history yet." />
               ) : (
                 <div className="h-56">
-                  <ResponsiveContainer
-                    width="100%"
-                    height="100%"
-                  >
+                  <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={walletHistory}>
                       <defs>
-                        <linearGradient
-                          id="wallet-gradient"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="0%"
-                            stopColor="#F59E0B"
-                            stopOpacity={0.3}
-                          />
+                        <linearGradient id="wallet-gradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.3} />
 
-                          <stop
-                            offset="100%"
-                            stopColor="#F59E0B"
-                            stopOpacity={0}
-                          />
+                          <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
                         </linearGradient>
                       </defs>
 
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#E2E8F0"
-                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
 
                       <XAxis
                         dataKey="day"
@@ -366,9 +296,7 @@ function WalletPage() {
                         tickLine={false}
                         axisLine={false}
                         width={80}
-                        tickFormatter={(value) =>
-                          `$${Number(value).toLocaleString()}`
-                        }
+                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
                       />
 
                       <Tooltip
@@ -376,10 +304,7 @@ function WalletPage() {
                           borderRadius: 8,
                           fontSize: 12,
                         }}
-                        formatter={(value) => [
-                          formatCurrency(Number(value ?? 0)),
-                          'Balance',
-                        ]}
+                        formatter={(value) => [formatCurrency(Number(value ?? 0)), "Balance"]}
                       />
 
                       <Area
@@ -405,25 +330,17 @@ function WalletPage() {
               {transactionsQuery.isLoading ? (
                 <StateRow text="Loading transactions..." />
               ) : transactionsQuery.isError ? (
-                <StateRow
-                  text="Unable to load transactions."
-                  error
-                />
+                <StateRow text="Unable to load transactions." error />
               ) : transactions.length === 0 ? (
                 <StateRow text="No Wallet transactions yet." />
               ) : (
                 <ol className="relative space-y-6 border-l-2 border-border pl-6">
-                  {transactions
-                    .slice(0, 10)
-                    .map((transaction, index) => (
-                      <TransactionTimelineRow
-                        key={getTransactionId(
-                          transaction,
-                          index,
-                        )}
-                        transaction={transaction}
-                      />
-                    ))}
+                  {transactions.slice(0, 10).map((transaction, index) => (
+                    <TransactionTimelineRow
+                      key={getTransactionId(transaction, index)}
+                      transaction={transaction}
+                    />
+                  ))}
                 </ol>
               )}
             </CardContent>
@@ -450,52 +367,34 @@ function WalletPage() {
             <CardContent>
               <Tabs defaultValue="deposits">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="deposits">
-                    Deposits
-                  </TabsTrigger>
+                  <TabsTrigger value="deposits">Deposits</TabsTrigger>
 
-                  <TabsTrigger value="withdrawals">
-                    Withdrawals
-                  </TabsTrigger>
+                  <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
                 </TabsList>
 
-                <TabsContent
-                  value="deposits"
-                  className="mt-3 space-y-2"
-                >
+                <TabsContent value="deposits" className="mt-3 space-y-2">
                   {deposits.length === 0 ? (
                     <StateRow text="No deposits yet." />
                   ) : (
                     deposits.map((transaction, index) => (
                       <HistoryRow
-                        key={getTransactionId(
-                          transaction,
-                          index,
-                        )}
+                        key={getTransactionId(transaction, index)}
                         transaction={transaction}
                       />
                     ))
                   )}
                 </TabsContent>
 
-                <TabsContent
-                  value="withdrawals"
-                  className="mt-3 space-y-2"
-                >
+                <TabsContent value="withdrawals" className="mt-3 space-y-2">
                   {withdrawals.length === 0 ? (
                     <StateRow text="No withdrawals yet." />
                   ) : (
-                    withdrawals.map(
-                      (transaction, index) => (
-                        <HistoryRow
-                          key={getTransactionId(
-                            transaction,
-                            index,
-                          )}
-                          transaction={transaction}
-                        />
-                      ),
-                    )
+                    withdrawals.map((transaction, index) => (
+                      <HistoryRow
+                        key={getTransactionId(transaction, index)}
+                        transaction={transaction}
+                      />
+                    ))
                   )}
                 </TabsContent>
               </Tabs>
@@ -524,31 +423,19 @@ function BalanceCard({
 
       <div className="relative flex items-start justify-between">
         <div>
-          <div className="text-xs uppercase tracking-wider text-white/60">
-            Available balance
-          </div>
+          <div className="text-xs uppercase tracking-wider text-white/60">Available balance</div>
 
           <div className="mt-2 text-4xl font-semibold tracking-tight">
-            {loading
-              ? 'Loading...'
-              : formatCurrency(balance)}
+            {loading ? "Loading..." : formatCurrency(balance)}
           </div>
 
-          {error && (
-            <div className="mt-2 text-xs text-red-300">
-              Unable to load Wallet balance.
-            </div>
-          )}
+          {error && <div className="mt-2 text-xs text-red-300">Unable to load Wallet balance.</div>}
 
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/70">
-            <span>
-              Buying power: {formatCurrency(balance)}
-            </span>
+            <span>Buying power: {formatCurrency(balance)}</span>
 
             {lastDepositAt && (
-              <span className="text-gold">
-                Last deposit: {formatDate(lastDepositAt)}
-              </span>
+              <span className="text-gold">Last deposit: {formatDate(lastDepositAt)}</span>
             )}
           </div>
         </div>
@@ -581,16 +468,10 @@ function MoveFundsCard({
   onWithdraw: () => void;
 }) {
   const depositDisabled =
-    depositPending ||
-    withdrawPending ||
-    !depositAmount ||
-    Number(depositAmount) < 1;
+    depositPending || withdrawPending || !depositAmount || Number(depositAmount) < 1;
 
   const withdrawDisabled =
-    withdrawPending ||
-    depositPending ||
-    !withdrawAmount ||
-    Number(withdrawAmount) < 1;
+    withdrawPending || depositPending || !withdrawAmount || Number(withdrawAmount) < 1;
 
   return (
     <Card>
@@ -601,23 +482,14 @@ function MoveFundsCard({
       <CardContent>
         <Tabs defaultValue="deposit">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="deposit">
-              Deposit
-            </TabsTrigger>
+            <TabsTrigger value="deposit">Deposit</TabsTrigger>
 
-            <TabsTrigger value="withdraw">
-              Withdraw
-            </TabsTrigger>
+            <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
           </TabsList>
 
-          <TabsContent
-            value="deposit"
-            className="mt-4 space-y-3"
-          >
+          <TabsContent value="deposit" className="mt-4 space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="deposit-amount">
-                Amount
-              </Label>
+              <Label htmlFor="deposit-amount">Amount</Label>
 
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -632,11 +504,7 @@ function MoveFundsCard({
                   placeholder="1,000.00"
                   className="h-11 pl-7"
                   value={depositAmount}
-                  onChange={(event) =>
-                    onDepositAmountChange(
-                      event.target.value,
-                    )
-                  }
+                  onChange={(event) => onDepositAmountChange(event.target.value)}
                 />
               </div>
             </div>
@@ -647,38 +515,21 @@ function MoveFundsCard({
                   key={amount}
                   type="button"
                   className="flex-1 rounded-md border py-1.5 text-xs hover:bg-muted"
-                  onClick={() =>
-                    onDepositAmountChange(
-                      String(amount),
-                    )
-                  }
+                  onClick={() => onDepositAmountChange(String(amount))}
                 >
-                  {amount >= 1000
-                    ? `$${amount / 1000}K`
-                    : `$${amount}`}
+                  {amount >= 1000 ? `$${amount / 1000}K` : `$${amount}`}
                 </button>
               ))}
             </div>
 
-            <Button
-              className="h-11 w-full"
-              disabled={depositDisabled}
-              onClick={onDeposit}
-            >
-              {depositPending
-                ? 'Depositing...'
-                : 'Deposit funds'}
+            <Button className="h-11 w-full" disabled={depositDisabled} onClick={onDeposit}>
+              {depositPending ? "Depositing..." : "Deposit funds"}
             </Button>
           </TabsContent>
 
-          <TabsContent
-            value="withdraw"
-            className="mt-4 space-y-3"
-          >
+          <TabsContent value="withdraw" className="mt-4 space-y-3">
             <div className="space-y-2">
-              <Label htmlFor="withdraw-amount">
-                Amount
-              </Label>
+              <Label htmlFor="withdraw-amount">Amount</Label>
 
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -693,11 +544,7 @@ function MoveFundsCard({
                   placeholder="0.00"
                   className="h-11 pl-7"
                   value={withdrawAmount}
-                  onChange={(event) =>
-                    onWithdrawAmountChange(
-                      event.target.value,
-                    )
-                  }
+                  onChange={(event) => onWithdrawAmountChange(event.target.value)}
                 />
               </div>
             </div>
@@ -708,14 +555,11 @@ function MoveFundsCard({
               disabled={withdrawDisabled}
               onClick={onWithdraw}
             >
-              {withdrawPending
-                ? 'Withdrawing...'
-                : 'Withdraw'}
+              {withdrawPending ? "Withdrawing..." : "Withdraw"}
             </Button>
 
             <p className="text-[11px] text-muted-foreground">
-              Withdrawals are subject to the Wallet
-              balance and holding-period rules.
+              Withdrawals are subject to the Wallet balance and holding-period rules.
             </p>
           </TabsContent>
         </Tabs>
@@ -724,37 +568,28 @@ function MoveFundsCard({
   );
 }
 
-function TransactionTimelineRow({
-  transaction,
-}: {
-  transaction: WalletTransaction;
-}) {
-  const type =
-    transaction.type?.toUpperCase() ?? '';
+function TransactionTimelineRow({ transaction }: { transaction: WalletTransaction }) {
+  const type = transaction.type?.toUpperCase() ?? "";
 
-  const status =
-    transaction.status?.toUpperCase() ??
-    'COMPLETED';
+  const status = transaction.status?.toUpperCase() ?? "COMPLETED";
 
-  const isDeposit = type === 'DEPOSIT';
+  const isDeposit = type === "DEPOSIT";
 
-  const isWithdrawal =
-    type === 'WITHDRAWAL' ||
-    type === 'WITHDRAW';
+  const isWithdrawal = type === "WITHDRAWAL" || type === "WITHDRAW";
 
-  const isRejected = status === 'REJECTED';
+  const isRejected = status === "REJECTED";
 
   return (
     <li className="relative">
       <span
         className={`absolute -left-[31px] top-0 grid h-6 w-6 place-items-center rounded-full ring-4 ring-background ${
           isRejected
-            ? 'bg-muted text-muted-foreground'
+            ? "bg-muted text-muted-foreground"
             : isDeposit
-              ? 'bg-profit/15 text-profit'
+              ? "bg-profit/15 text-profit"
               : isWithdrawal
-                ? 'bg-loss/15 text-loss'
-                : 'bg-primary/15 text-primary'
+                ? "bg-loss/15 text-loss"
+                : "bg-primary/15 text-primary"
         }`}
       >
         {isDeposit ? (
@@ -768,20 +603,12 @@ function TransactionTimelineRow({
 
       <div className="flex items-center justify-between gap-4">
         <div>
-          <div className="text-sm font-medium">
-            {formatTransactionType(
-              transaction.type,
-            )}
-          </div>
+          <div className="text-sm font-medium">{formatTransactionType(transaction.type)}</div>
 
-          <div className="text-xs text-muted-foreground">
-            {formatDate(transaction.createdAt)}
-          </div>
+          <div className="text-xs text-muted-foreground">{formatDate(transaction.createdAt)}</div>
 
           {transaction.description && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              {transaction.description}
-            </div>
+            <div className="mt-1 text-xs text-muted-foreground">{transaction.description}</div>
           )}
         </div>
 
@@ -789,30 +616,24 @@ function TransactionTimelineRow({
           <div
             className={`text-sm font-semibold ${
               isRejected
-                ? 'text-muted-foreground line-through'
+                ? "text-muted-foreground line-through"
                 : isDeposit
-                  ? 'text-profit'
+                  ? "text-profit"
                   : isWithdrawal
-                    ? 'text-loss'
-                    : ''
+                    ? "text-loss"
+                    : ""
             }`}
           >
-            {!isRejected && isDeposit ? '+' : ''}
+            {!isRejected && isDeposit ? "+" : ""}
 
-            {!isRejected && isWithdrawal
-              ? '-'
-              : ''}
+            {!isRejected && isWithdrawal ? "-" : ""}
 
             {formatCurrency(transaction.amount)}
           </div>
 
           <Badge
             variant="outline"
-            className={
-              isRejected
-                ? 'border-loss/30 text-[10px] text-loss'
-                : 'text-[10px]'
-            }
+            className={isRejected ? "border-loss/30 text-[10px] text-loss" : "text-[10px]"}
           >
             {status}
           </Badge>
@@ -822,48 +643,32 @@ function TransactionTimelineRow({
   );
 }
 
-function HistoryRow({
-  transaction,
-}: {
-  transaction: WalletTransaction;
-}) {
-  const status =
-    transaction.status?.toUpperCase() ??
-    'COMPLETED';
+function HistoryRow({ transaction }: { transaction: WalletTransaction }) {
+  const status = transaction.status?.toUpperCase() ?? "COMPLETED";
 
-  const isRejected = status === 'REJECTED';
+  const isRejected = status === "REJECTED";
 
   return (
     <div className="flex items-center justify-between rounded-md border p-3">
       <div className="min-w-0">
         <div
           className={`text-sm font-medium ${
-            isRejected
-              ? 'text-muted-foreground line-through'
-              : ''
+            isRejected ? "text-muted-foreground line-through" : ""
           }`}
         >
           {formatCurrency(transaction.amount)}
         </div>
 
-        <div className="text-[11px] text-muted-foreground">
-          {formatDate(transaction.createdAt)}
-        </div>
+        <div className="text-[11px] text-muted-foreground">{formatDate(transaction.createdAt)}</div>
 
         {transaction.description && (
-          <div className="mt-1 text-[11px] text-muted-foreground">
-            {transaction.description}
-          </div>
+          <div className="mt-1 text-[11px] text-muted-foreground">{transaction.description}</div>
         )}
       </div>
 
       <Badge
         variant="outline"
-        className={
-          isRejected
-            ? 'border-loss/30 text-[10px] text-loss'
-            : 'text-[10px]'
-        }
+        className={isRejected ? "border-loss/30 text-[10px] text-loss" : "text-[10px]"}
       >
         {status}
       </Badge>
@@ -871,19 +676,11 @@ function HistoryRow({
   );
 }
 
-function StateRow({
-  text,
-  error = false,
-}: {
-  text: string;
-  error?: boolean;
-}) {
+function StateRow({ text, error = false }: { text: string; error?: boolean }) {
   return (
     <div
       className={`rounded-md border border-dashed p-6 text-center text-sm ${
-        error
-          ? 'border-loss/30 bg-loss/10 text-loss'
-          : 'text-muted-foreground'
+        error ? "border-loss/30 bg-loss/10 text-loss" : "text-muted-foreground"
       }`}
     >
       {text}
@@ -892,15 +689,15 @@ function StateRow({
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
   }).format(Number(value ?? 0));
 }
 
 function formatDate(value?: string) {
   if (!value) {
-    return 'Date unavailable';
+    return "Date unavailable";
   }
 
   const date = new Date(value);
@@ -914,90 +711,62 @@ function formatDate(value?: string) {
 
 function formatTransactionType(type?: string) {
   if (!type) {
-    return 'Wallet Transaction';
+    return "Wallet Transaction";
   }
 
   return type
-    .replaceAll('_', ' ')
+    .replaceAll("_", " ")
     .toLowerCase()
-    .replace(/\b\w/g, (character) =>
-      character.toUpperCase(),
-    );
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
-function getTransactionId(
-  transaction: WalletTransaction,
-  index: number,
-) {
+function getTransactionId(transaction: WalletTransaction, index: number) {
   return (
-    transaction._id ??
-    transaction.id ??
-    `${transaction.type}-${transaction.createdAt ?? index}`
+    transaction._id ?? transaction.id ?? `${transaction.type}-${transaction.createdAt ?? index}`
   );
 }
 
-function createWalletHistory(
-  transactions: WalletTransaction[],
-) {
+function createWalletHistory(transactions: WalletTransaction[]) {
   let runningBalance = 0;
 
   return [...transactions]
     .sort((first, second) => {
-      const firstTime = new Date(
-        first.createdAt ?? 0,
-      ).getTime();
+      const firstTime = new Date(first.createdAt ?? 0).getTime();
 
-      const secondTime = new Date(
-        second.createdAt ?? 0,
-      ).getTime();
+      const secondTime = new Date(second.createdAt ?? 0).getTime();
 
       return firstTime - secondTime;
     })
     .map((transaction, index) => {
-      const type =
-        transaction.type?.toUpperCase() ?? '';
+      const type = transaction.type?.toUpperCase() ?? "";
 
-      const status =
-        transaction.status?.toUpperCase() ??
-        'COMPLETED';
+      const status = transaction.status?.toUpperCase() ?? "COMPLETED";
 
-      const amount = Number(
-        transaction.amount ?? 0,
-      );
+      const amount = Number(transaction.amount ?? 0);
 
       /*
        * Only completed transactions change the
        * calculated Wallet history.
        */
-      if (status === 'COMPLETED') {
-        if (
-          type === 'DEPOSIT' ||
-          type === 'SELL'
-        ) {
+      if (status === "COMPLETED") {
+        if (type === "DEPOSIT" || type === "SELL") {
           runningBalance += amount;
         }
 
-        if (
-          type === 'WITHDRAWAL' ||
-          type === 'WITHDRAW' ||
-          type === 'BUY'
-        ) {
+        if (type === "WITHDRAWAL" || type === "WITHDRAW" || type === "BUY") {
           runningBalance -= amount;
         }
       }
 
-      const transactionDate = transaction.createdAt
-        ? new Date(transaction.createdAt)
-        : null;
+      const transactionDate = transaction.createdAt ? new Date(transaction.createdAt) : null;
 
       const formattedDate =
-        transactionDate &&
-        !Number.isNaN(transactionDate.getTime())
+        transactionDate && !Number.isNaN(transactionDate.getTime())
           ? transactionDate.toLocaleString([], {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })
           : `Transaction ${index + 1}`;
 
@@ -1005,15 +774,11 @@ function createWalletHistory(
         day: formattedDate,
         balance: Math.max(runningBalance, 0),
       };
-    }); 
+    });
 }
 
 function getErrorMessage(error: unknown) {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error
-  ) {
+  if (typeof error === "object" && error !== null && "response" in error) {
     const response = (
       error as {
         response?: {
@@ -1024,14 +789,13 @@ function getErrorMessage(error: unknown) {
       }
     ).response;
 
-    const backendMessage =
-      response?.data?.message;
+    const backendMessage = response?.data?.message;
 
     if (Array.isArray(backendMessage)) {
-      return backendMessage.join(', ');
+      return backendMessage.join(", ");
     }
 
-    if (typeof backendMessage === 'string') {
+    if (typeof backendMessage === "string") {
       return backendMessage;
     }
   }
@@ -1040,5 +804,5 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'The Wallet request could not be completed.';
+  return "The Wallet request could not be completed.";
 }

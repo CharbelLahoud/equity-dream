@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { getMyProfile } from "@/services/member";
-import { DashboardWalletCard } from '@/components/dashboard-wallet-card';
+import { getMyProfile } from "@/services/members.service";
+import { DashboardWalletCard } from "@/components/dashboard-wallet-card";
 import {
   Area,
   AreaChart,
@@ -59,17 +59,16 @@ function Dashboard() {
   const navigate = useNavigate();
   const [token, setToken] = useState<string | null>(null);
 
-useEffect(() => {
-  const storedToken =
-    localStorage.getItem("accessToken") ??
-    sessionStorage.getItem("accessToken");
+  useEffect(() => {
+    const storedToken =
+      localStorage.getItem("accessToken") ?? sessionStorage.getItem("accessToken");
 
-  setToken(storedToken);
+    setToken(storedToken);
 
-  if (!storedToken) {
-    navigate({ to: "/login" });
-  }
-}, [navigate]);
+    if (!storedToken) {
+      navigate({ to: "/login" });
+    }
+  }, [navigate]);
 
   const {
     data: member,

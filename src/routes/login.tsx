@@ -232,30 +232,18 @@
 //     </div>
 //   );
 // }
-import {
-  createFileRoute,
-  Link,
-  useNavigate,
-} from '@tanstack/react-router';
-import axios from 'axios';
-import {
-  useState,
-  type FormEvent,
-} from 'react';
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import axios from "axios";
+import { useState, type FormEvent } from "react";
 
-import { api } from '@/services/api';
+import { api } from "@/services/api";
 
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
-import {
-  LineChart,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
+import { LineChart, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 interface LoginResponse {
   accessToken: string;
@@ -270,25 +258,23 @@ interface LoginResponse {
   };
 }
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       {
-        title: 'Sign in · Meridian Trading',
+        title: "Sign in · Meridian Trading",
       },
       {
-        name: 'description',
-        content:
-          'Sign in to your Meridian trading account.',
+        name: "description",
+        content: "Sign in to your Meridian trading account.",
       },
       {
-        property: 'og:title',
-        content: 'Sign in · Meridian',
+        property: "og:title",
+        content: "Sign in · Meridian",
       },
       {
-        property: 'og:description',
-        content:
-          'Access your portfolio, orders and watchlist.',
+        property: "og:description",
+        content: "Access your portfolio, orders and watchlist.",
       },
     ],
   }),
@@ -299,58 +285,39 @@ export const Route = createFileRoute('/login')({
 function LoginPage() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] =
-    useState('');
-  const [rememberMe, setRememberMe] =
-    useState(false);
-  const [isLoading, setIsLoading] =
-    useState(false);
-  const [errorMessage, setErrorMessage] =
-    useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setIsLoading(true);
-    setErrorMessage('');
+    setErrorMessage("");
 
     try {
-      const response =
-        await api.post<LoginResponse>(
-          '/auth/login',
-          {
-            email: email.trim(),
-            password,
-          },
-        );
+      const response = await api.post<LoginResponse>("/auth/login", {
+        email: email.trim(),
+        password,
+      });
 
-      const {
-        accessToken,
-        user,
-      } = response.data;
+      const { accessToken, user } = response.data;
 
       if (!accessToken) {
-        throw new Error(
-          'The login response did not contain an access token.',
-        );
+        throw new Error("The login response did not contain an access token.");
       }
 
       /*
        * Remove previous authentication information
        * before saving the new login session.
        */
-      localStorage.removeItem(
-        'accessToken',
-      );
-      localStorage.removeItem('user');
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
 
-      sessionStorage.removeItem(
-        'accessToken',
-      );
-      sessionStorage.removeItem('user');
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("user");
 
       /*
        * Remember me:
@@ -358,73 +325,38 @@ function LoginPage() {
        * - false: token remains only for this browser tab/session
        */
       if (rememberMe) {
-        localStorage.setItem(
-          'accessToken',
-          accessToken,
-        );
+        localStorage.setItem("accessToken", accessToken);
 
-        localStorage.setItem(
-          'user',
-          JSON.stringify(user),
-        );
+        localStorage.setItem("user", JSON.stringify(user));
       } else {
-        sessionStorage.setItem(
-          'accessToken',
-          accessToken,
-        );
+        sessionStorage.setItem("accessToken", accessToken);
 
-        sessionStorage.setItem(
-          'user',
-          JSON.stringify(user),
-        );
+        sessionStorage.setItem("user", JSON.stringify(user));
       }
 
       await navigate({
-        to: '/',
+        to: "/",
       });
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        const backendMessage =
-          error.response?.data?.message;
+        const backendMessage = error.response?.data?.message;
 
-        if (
-          Array.isArray(backendMessage)
-        ) {
-          setErrorMessage(
-            backendMessage.join(', '),
-          );
-        } else if (
-          typeof backendMessage ===
-          'string'
-        ) {
-          setErrorMessage(
-            backendMessage,
-          );
-        } else if (
-          error.code === 'ERR_NETWORK'
-        ) {
-          setErrorMessage(
-            'Unable to connect to the backend server.',
-          );
+        if (Array.isArray(backendMessage)) {
+          setErrorMessage(backendMessage.join(", "));
+        } else if (typeof backendMessage === "string") {
+          setErrorMessage(backendMessage);
+        } else if (error.code === "ERR_NETWORK") {
+          setErrorMessage("Unable to connect to the backend server.");
         } else {
-          setErrorMessage(
-            'Login failed. Check your email and password.',
-          );
+          setErrorMessage("Login failed. Check your email and password.");
         }
-      } else if (
-        error instanceof Error
-      ) {
+      } else if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage(
-          'An unexpected error occurred.',
-        );
+        setErrorMessage("An unexpected error occurred.");
       }
 
-      console.error(
-        'Login failed:',
-        error,
-      );
+      console.error("Login failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -443,55 +375,38 @@ function LoginPage() {
           </div>
 
           <div>
-            <div className="font-semibold tracking-tight">
-              Meridian
-            </div>
+            <div className="font-semibold tracking-tight">Meridian</div>
 
-            <div className="text-xs text-white/60">
-              Trading Platform
-            </div>
+            <div className="text-xs text-white/60">Trading Platform</div>
           </div>
         </div>
 
         <div className="relative">
           <h2 className="text-4xl font-semibold leading-tight tracking-tight">
-            Trade smarter.{' '}
-
-            <span className="text-gold">
-              Invest with confidence.
-            </span>
+            Trade smarter. <span className="text-gold">Invest with confidence.</span>
           </h2>
 
           <p className="mt-4 max-w-md text-white/70">
-            A professional trading
-            platform built for modern
-            investors, with market
-            information, analytics, and
-            portfolio management.
+            A professional trading platform built for modern investors, with market information,
+            analytics, and portfolio management.
           </p>
 
           <div className="mt-10 grid max-w-md gap-4">
             {[
               {
                 icon: LineChart,
-                title:
-                  'Market information',
-                body:
-                  'View available stocks and their latest prices.',
+                title: "Market information",
+                body: "View available stocks and their latest prices.",
               },
               {
                 icon: ShieldCheck,
-                title:
-                  'Secure authentication',
-                body:
-                  'Access protected member and CMS features.',
+                title: "Secure authentication",
+                body: "Access protected member and CMS features.",
               },
               {
                 icon: Sparkles,
-                title:
-                  'Portfolio analytics',
-                body:
-                  'Review investment activity and performance.',
+                title: "Portfolio analytics",
+                body: "Review investment activity and performance.",
               },
             ].map((feature) => (
               <div
@@ -503,13 +418,9 @@ function LoginPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <div className="text-sm font-medium">
-                    {feature.title}
-                  </div>
+                  <div className="text-sm font-medium">{feature.title}</div>
 
-                  <div className="text-xs text-white/60">
-                    {feature.body}
-                  </div>
+                  <div className="text-xs text-white/60">{feature.body}</div>
                 </div>
               </div>
             ))}
@@ -517,13 +428,9 @@ function LoginPage() {
         </div>
 
         <div className="relative flex items-center justify-between text-xs text-white/50">
-          <span>
-            © 2026 Meridian Capital
-          </span>
+          <span>© 2026 Meridian Capital</span>
 
-          <span>
-            Stock Market Platform
-          </span>
+          <span>Stock Market Platform</span>
         </div>
       </div>
 
@@ -536,39 +443,25 @@ function LoginPage() {
               <TrendingUp className="h-5 w-5" />
             </div>
 
-            <span className="font-semibold tracking-tight">
-              Meridian
-            </span>
+            <span className="font-semibold tracking-tight">Meridian</span>
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Welcome back
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Welcome back</h1>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to your account to
-            continue trading.
+            Sign in to your account to continue trading.
           </p>
 
-          <form
-            className="mt-8 space-y-4"
-            onSubmit={handleSubmit}
-          >
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="email">
-                Email address
-              </Label>
+              <Label htmlFor="email">Email address</Label>
 
               <Input
                 id="email"
                 name="email"
                 type="email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(
-                    event.target.value,
-                  )
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@company.com"
                 autoComplete="email"
                 className="h-11"
@@ -579,14 +472,9 @@ function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">
-                  Password
-                </Label>
+                <Label htmlFor="password">Password</Label>
 
-                <Link
-                  to="/login"
-                  className="text-xs font-medium text-primary hover:underline"
-                >
+                <Link to="/login" className="text-xs font-medium text-primary hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -596,11 +484,7 @@ function LoginPage() {
                 name="password"
                 type="password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(
-                    event.target.value,
-                  )
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 autoComplete="current-password"
                 className="h-11"
@@ -614,19 +498,10 @@ function LoginPage() {
                 id="remember"
                 checked={rememberMe}
                 disabled={isLoading}
-                onCheckedChange={(
-                  checked,
-                ) =>
-                  setRememberMe(
-                    checked === true,
-                  )
-                }
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
               />
 
-              <Label
-                htmlFor="remember"
-                className="text-sm font-normal text-muted-foreground"
-              >
+              <Label htmlFor="remember" className="text-sm font-normal text-muted-foreground">
                 Remember me
               </Label>
             </div>
@@ -640,34 +515,22 @@ function LoginPage() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="h-11 w-full text-base"
-              disabled={isLoading}
-            >
-              {isLoading
-                ? 'Signing in...'
-                : 'Sign in'}
+            <Button type="submit" className="h-11 w-full text-base" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
 
-            <span className="text-xs text-muted-foreground">
-              New member?
-            </span>
+            <span className="text-xs text-muted-foreground">New member?</span>
 
             <div className="h-px flex-1 bg-border" />
           </div>
 
           <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{' '}
-
-            <Link
-              to="/register"
-              className="font-medium text-primary hover:underline"
-            >
+            Don't have an account?{" "}
+            <Link to="/register" className="font-medium text-primary hover:underline">
               Create one
             </Link>
           </p>

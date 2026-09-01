@@ -13,12 +13,11 @@ import {
   suspendMember,
   reinstateMember,
   type ReviewMemberIdentityDto,
-} from "@/services/member";
+} from "@/services/members.service";
 
 export const Route = createFileRoute("/members_/$id")({
   component: MemberDetailsPage,
 });
-
 
 function MemberDetailsPage() {
   const navigate = useNavigate();

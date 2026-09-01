@@ -33,7 +33,7 @@ export type CreateCmsUserResponse = {
   message: string;
   cmsUser: CmsUser;
 };
-``
+``;
 export async function getCmsUsers(): Promise<CmsUsersResponse> {
   const response = await api.get<CmsUsersResponse>("/cms-users");
 
@@ -62,13 +62,8 @@ export async function reinstateCmsUser(
 
   return response.data;
 }
-export async function createCmsUser(
-  dto: CreateCmsUserDto,
-): Promise<CreateCmsUserResponse> {
-  const response = await api.post<CreateCmsUserResponse>(
-    "/cms-users",
-    dto,
-  );
+export async function createCmsUser(dto: CreateCmsUserDto): Promise<CreateCmsUserResponse> {
+  const response = await api.post<CreateCmsUserResponse>("/cms-users", dto);
 
   return response.data;
 }
