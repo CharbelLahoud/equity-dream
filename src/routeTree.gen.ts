@@ -23,6 +23,7 @@ import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StocksRouteImport } from './routes/stocks'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as VerifyOtpRouteImport } from './routes/verify-otp'
@@ -100,6 +101,11 @@ const SetPasswordRoute = SetPasswordRouteImport.update({
   path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StocksRoute = StocksRouteImport.update({
   id: '/stocks',
   path: '/stocks',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/set-password': typeof SetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
   '/verify-otp': typeof VerifyOtpRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/set-password': typeof SetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
   '/verify-otp': typeof VerifyOtpRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/set-password': typeof SetPasswordRoute
+  '/settings': typeof SettingsRoute
   '/stocks': typeof StocksRoute
   '/transactions': typeof TransactionsRoute
   '/verify-otp': typeof VerifyOtpRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/set-password'
+    | '/settings'
     | '/stocks'
     | '/transactions'
     | '/verify-otp'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/set-password'
+    | '/settings'
     | '/stocks'
     | '/transactions'
     | '/verify-otp'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/register'
     | '/set-password'
+    | '/settings'
     | '/stocks'
     | '/transactions'
     | '/verify-otp'
@@ -282,6 +294,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   SetPasswordRoute: typeof SetPasswordRoute
+  SettingsRoute: typeof SettingsRoute
   StocksRoute: typeof StocksRoute
   TransactionsRoute: typeof TransactionsRoute
   VerifyOtpRoute: typeof VerifyOtpRoute
@@ -390,6 +403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stocks': {
       id: '/stocks'
       path: '/stocks'
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   SetPasswordRoute: SetPasswordRoute,
+  SettingsRoute: SettingsRoute,
   StocksRoute: StocksRoute,
   TransactionsRoute: TransactionsRoute,
   VerifyOtpRoute: VerifyOtpRoute,
