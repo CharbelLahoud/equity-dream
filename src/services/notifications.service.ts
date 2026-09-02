@@ -121,3 +121,7 @@ export async function getStocksForAlerts() {
 
   return [];
 }
+export async function deletePriceAlert(alertId: string) {
+  const response = await api.delete(`/notifications/price-alerts/${alertId}`);
+  return response.data;
+}

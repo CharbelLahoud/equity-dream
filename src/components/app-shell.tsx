@@ -428,6 +428,10 @@ export function AppShell({
       return isCms;
     }
 
+    if (item.to === "/analytics") {
+      return isCms;
+    }
+
     if (item.to === "/members") {
       return (
         isCms &&

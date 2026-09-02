@@ -28,10 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { Bell, Plus, TrendingDown, TrendingUp } from "lucide-react";
+import { Bell, Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 
 import {
   createPriceAlert,
+  deletePriceAlert,
   getNotifications,
   getPriceAlerts,
   getStocksForAlerts,
@@ -149,6 +150,22 @@ function NotificationsPage() {
     mutationFn: updatePriceAlertStatus,
 
     onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["notifications", "price-alerts"],
+      });
+    },
+
+    onError: (error: unknown) => {
+      showMessage(getErrorMessage(error), "error");
+    },
+  });
+
+  const deleteAlertMutation = useMutation({
+    mutationFn: deletePriceAlert,
+
+    onSuccess: async () => {
+      showMessage("Price alert deleted.", "success");
+
       await queryClient.invalidateQueries({
         queryKey: ["notifications", "price-alerts"],
       });
@@ -377,6 +394,7 @@ function NotificationsPage() {
                         isActive,
                       })
                     }
+                    onDelete={() => deleteAlertMutation.mutate(alert._id)}
                   />
                 ))
               )}
@@ -450,10 +468,12 @@ function PriceAlertRow({
   alert,
   disabled,
   onStatusChange,
+  onDelete,
 }: {
   alert: PriceAlert;
   disabled: boolean;
   onStatusChange: (isActive: boolean) => void;
+  onDelete: () => void;
 }) {
   const stock = typeof alert.stockId === "object" ? alert.stockId : undefined;
 
@@ -484,6 +504,15 @@ function PriceAlertRow({
       </div>
 
       <Switch checked={alert.isActive} disabled={disabled} onCheckedChange={onStatusChange} />
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 text-muted-foreground hover:text-loss"
+        onClick={onDelete}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
     </div>
   );
 }
